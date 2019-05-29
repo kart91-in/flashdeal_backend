@@ -13,7 +13,4 @@ class VendorSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     gstin_number = serializers.CharField(allow_blank=True)
     phone = serializers.CharField(allow_blank=True)
-    status = serializers.ChoiceField(choices=Vendor.STATUS)
-
-
 

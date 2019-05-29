@@ -16,7 +16,6 @@ class VendorTest(BaseTest):
             'email': 'company@gmail.com',
             'gstin_number': 1123123,
             'phone': 1123123,
-            'status': 1,
         }
 
     def test_create_valid_vendor_item(self):
