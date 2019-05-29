@@ -1,9 +1,6 @@
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import force_authenticate, APIRequestFactory, APIClient
-
 from flashdeal.models import Vendor
 from flashdeal.test.base_request_test import BaseTest
 
