@@ -8,11 +8,13 @@ class Vendor(BaseModel):
 
     STATUS_NOT_VERIFIED = 0
     STATUS_VERIFIED = 1
-    STATUS_DISABLE = 2
+    STATUS_REJECTED = 2
+    STATUS_DISABLE = 3
 
     STATUS = (
         (STATUS_NOT_VERIFIED, 'Not Verified'),
         (STATUS_VERIFIED, 'Verified'),
+        (STATUS_REJECTED, 'Rejected'),
         (STATUS_DISABLE, 'Disabled'),
     )
 
@@ -34,6 +36,8 @@ class Vendor(BaseModel):
     def reject(self, by_user, note):
         if self.status != Vendor.STATUS_NOT_VERIFIED:
             raise ValidationError('This Vendor is not in state to reject')
+        self.status = Vendor.STATUS_REJECTED
+        self.save()
         self.logs.create(user=by_user, note=note, type=VendorApprovalLog.TYPE_REJECT)
 
     def disable(self, by_user, note):
@@ -52,4 +56,5 @@ class VendorApprovalLog(BaseApprovalLogModel):
         (TYPE_DISABLE, 'Disable'),
     )
 
-    vendor = models.ForeignKey('Vendor', on_delete=models.PROTECT, related_name='logs', related_query_name='log')
+    vendor = models.ForeignKey('Vendor', on_delete=models.PROTECT, related_name='logs',
+                               related_query_name='log')
