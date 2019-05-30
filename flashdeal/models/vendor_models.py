@@ -58,3 +58,4 @@ class VendorApprovalLog(BaseApprovalLogModel):
 
     vendor = models.ForeignKey('Vendor', on_delete=models.PROTECT, related_name='logs',
                                related_query_name='log')
+

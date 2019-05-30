@@ -1,6 +1,7 @@
 Django==2.2.1
 djangorestframework==3.9.4
 Faker==1.0.7
+Pillow==6.0.0
 psycopg2==2.8.2
 python-dateutil==2.8.0
 pytz==2019.1

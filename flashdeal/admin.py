@@ -5,7 +5,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse, path
 from django.utils.html import format_html
 from flashdeal.forms import AddLogNoteForm
-from flashdeal.models import Vendor, VendorApprovalLog
+from flashdeal.models.vendor_models import Vendor, VendorApprovalLog
 
 
 @admin.register(Vendor)

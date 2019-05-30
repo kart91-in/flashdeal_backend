@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-from flashdeal.models import Vendor
+from flashdeal.models.vendor_models import Vendor
 
 
 class VendorSerializer(serializers.ModelSerializer):

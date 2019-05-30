@@ -1,6 +1,6 @@
 from rest_framework.generics import mixins, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
-from flashdeal.models import Vendor
+from flashdeal.models.vendor_models import Vendor
 from flashdeal.serializers import VendorSerializer
 
 
