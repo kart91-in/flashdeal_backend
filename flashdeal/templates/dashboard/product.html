@@ -1,0 +1,56 @@
+{% extends 'dashboard/base.html' %}
+
+
+{% block page_actions %}
+  <ul class="nav navbar-right panel_toolbox">
+    <li>
+      <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+    </li>
+    <li>
+      <a href="{% url 'flashdeal:product_create' %}"><i style="color: #0fc106" class="fa fa-plus-circle"></i></a>
+    </li>
+  </ul>
+{% endblock %}
+{% block main_content %}
+  <div class="table-responsive">
+    <table class="table table-striped jambo_table bulk_action">
+      <thead>
+      <tr class="headings">
+        <th>
+          <input type="checkbox" id="check-all" class="flat">
+        </th>
+        <th class="column-title">Product id </th>
+        <th class="column-title">Name </th>
+        <th class="column-title">Catalogs </th>
+        <th class="column-title">Image </th>
+        <th class="column-title">Sale Price </th>
+        <th class="column-title">Upper Price </th>
+        <th class="column-title">Upload date</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for product in object_list %}
+        <tr class=" pointer">
+          <td class="a-center ">
+            <input type="checkbox" class="flat" name="table_records">
+          </td>
+          <td class=" ">{{ product.id }}</td>
+          <td class=" ">{{ product.name|title }}</td>
+          <td class=" ">{{ product.catalogs_list }}</td>
+          <td class=" ">
+            {% if product.image_url %}
+              <img width="250" src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+              --
+            {% endif %}
+          </td>
+          <td class=" ">{{ product.sale_price }}</td>
+          <td class=" ">{{ product.upper_price }}</td>
+          <td class="a-right a-right ">{{ product.created_at }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+

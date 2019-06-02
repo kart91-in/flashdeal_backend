@@ -1,0 +1,22 @@
+{% load static %}
+{% if app_list %}
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+    <div class="menu_section">
+      <ul class="nav side-menu">
+        {% for app in app_list %}
+          <li class="nav-item full-width">
+            <a href="{{ app.url }}">
+              <i class="fa fa-{{ app.icon }}"></i> {{ app.text }}
+              <span class="fa fa-chevron-down"></span>
+            </a>
+            <ul class="nav child_menu">
+              {% for item in app.sub_item %}
+                <li><a href="{{ item.url }}">{{ item.text }}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
