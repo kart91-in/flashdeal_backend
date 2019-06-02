@@ -35,7 +35,11 @@
             <input type="checkbox" class="flat" name="table_records">
           </td>
           <td class=" ">{{ product.id }}</td>
-          <td class=" ">{{ product.name|title }}</td>
+          <td class=" ">
+            <a href="{% url 'flashdeal:product_detail' pk=product.id %}">
+              <strong>{{ product.name|title }}</strong>
+            </a>
+          </td>
           <td class=" ">{{ product.catalogs_list }}</td>
           <td class=" ">
             {% if product.image_url %}

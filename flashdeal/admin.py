@@ -110,6 +110,7 @@ class ProductAdmin(admin.ModelAdmin):
 class CatalogAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'vendor', 'status', 'created_at', 'product_count')
+    list_filter = ('status', )
 
     def product_count(self, obj):
         return f'{obj.products.all().count()} product(s)'

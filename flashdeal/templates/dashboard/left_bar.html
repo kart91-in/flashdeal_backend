@@ -4,12 +4,12 @@
     <div class="menu_section">
       <ul class="nav side-menu">
         {% for app in app_list %}
-          <li class="nav-item full-width">
+          <li class="nav-item full-width active">
             <a href="{{ app.url }}">
               <i class="fa fa-{{ app.icon }}"></i> {{ app.text }}
               <span class="fa fa-chevron-down"></span>
             </a>
-            <ul class="nav child_menu">
+            <ul class="nav child_menu" style="display: block;">
               {% for item in app.sub_item %}
                 <li><a href="{{ item.url }}">{{ item.text }}</a></li>
               {% endfor %}

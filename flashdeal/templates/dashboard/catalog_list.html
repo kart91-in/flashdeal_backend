@@ -1,0 +1,77 @@
+{% extends 'dashboard/base.html' %}
+
+
+{% block page_actions %}
+  <ul class="nav navbar-right panel_toolbox">
+    <li>
+      <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+    </li>
+    <li>
+      <a href="{% url 'flashdeal:catalog_create' %}"><i style="color: #0fc106" class="fa fa-plus-circle"></i></a>
+    </li>
+  </ul>
+{% endblock %}
+{% block main_content %}
+  {% if error %}
+    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+      </button>
+      <strong>Error: </strong> {{ error }}
+    </div>
+  {% endif %}
+
+  {% if message %}
+    <div class="alert alert-success alert-dismissible fade in" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span>
+      </button>
+      <strong>{{ message }}</strong>
+    </div>
+  {% endif %}
+  <div class="table-responsive">
+    <table class="table table-striped jambo_table bulk_action">
+      <thead>
+      <tr class="headings">
+        <th>
+          <input type="checkbox" id="check-all" class="flat">
+        </th>
+        <th class="column-title">Catalog id </th>
+        <th class="column-title">Name </th>
+        <th class="column-title">Products count </th>
+        <th class="column-title">Status </th>
+        <th class="column-title">Image </th>
+        <th class="column-title">Upload date</th>
+        <th class="column-title">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for catalog in object_list %}
+        <tr class=" pointer">
+          <td class="a-center ">
+            <input type="checkbox" class="flat" name="table_records">
+          </td>
+          <td class=" ">{{ catalog.id }}</td>
+          <td class=" ">{{ catalog.name|title }}</td>
+          <td class=" ">{{ catalog.products.count }} product(s)</td>
+          <td class=" ">{{ catalog.get_status_display }}</td>
+          <td class=" ">
+            {% if catalog.image_url %}
+              <img width="150" src="{{ catalog.image_url }}" alt="{{ catalog.name }}">
+            {% else %}
+              --
+            {% endif %}
+          </td>
+          <td class="a-right a-right ">{{ catalog.created_at }}</td>
+          <td class="a-right a-right ">
+            {% if catalog.is_submitted %}
+              --
+            {% else %}
+              <a href="{% url 'flashdeal:catalog_submit' pk=catalog.id %}" class="btn btn-success">Submit</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+

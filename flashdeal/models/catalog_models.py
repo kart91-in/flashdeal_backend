@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from core.models import BaseModel, BaseApprovalLogModel
-from flashdeal.models import Vendor, Product
+from flashdeal.models import Vendor, Product, Image
 
 
 class Catalog(BaseModel):
@@ -10,19 +10,38 @@ class Catalog(BaseModel):
     STATUS_VERIFIED = 1
     STATUS_REJECTED = 2
     STATUS_DISABLE = 3
+    STATUS_SUBMITTED = 3
 
     STATUS = (
         (STATUS_NOT_VERIFIED, 'Not Verified'),
         (STATUS_VERIFIED, 'Verified'),
         (STATUS_REJECTED, 'Rejected'),
         (STATUS_DISABLE, 'Disabled'),
+        (STATUS_SUBMITTED, 'Submitted for approval'),
     )
 
     name = models.CharField(max_length=500)
+    description = models.TextField(blank=True, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='catalogs',
                                related_query_name='catalog')
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
     products = models.ManyToManyField(Product, blank=True, related_name='catalogs', related_query_name='catalog')
+    images = models.ManyToManyField(Image, blank=True, related_name='catalogs', related_query_name='catalog')
+
+    def is_submitted(self):
+        return self.status == self.STATUS_SUBMITTED
+
+    def image_url(self):
+        image = self.images.first()
+        if not image: return None
+        return image.image.url
+
+    def submit_for_approval(self):
+        if self.status not in [self.STATUS_REJECTED, self.STATUS_NOT_VERIFIED]:
+            raise ValidationError('This Catalog is not in state to submit')
+        self.status = self.STATUS_SUBMITTED
+        self.save()
+        self.logs.create(user=self.vendor.user, type=CatalogApprovalLog.TYPE_SUBMIT)
 
     def approve(self, by_user):
         if self.status != self.STATUS_NOT_VERIFIED:
@@ -40,6 +59,12 @@ class Catalog(BaseModel):
 
 
 class CatalogApprovalLog(BaseApprovalLogModel):
+
+    TYPE_SUBMIT = 2
+
+    TYPE = BaseApprovalLogModel.TYPE + (
+        (TYPE_SUBMIT, 'Submit for approval')
+    )
 
     vendor = models.ForeignKey('Catalog', on_delete=models.PROTECT,
                                related_name='logs',

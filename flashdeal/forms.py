@@ -43,13 +43,21 @@ class CreateProductForm(forms.ModelForm):
 class CreateCatalogForm(forms.ModelForm):
     class Meta:
         model = Catalog
-        fields = ('name', 'products', )
+        fields = ('name', 'description', 'products', )
 
     def __init__(self, *args, **kwargs):
         self._user = kwargs.pop('user')
+        self._image_list = kwargs.pop('_image_list')
         super().__init__(*args, **kwargs)
         self.fields['products'].queryset = Product.objects.filter(vendor=self._user.vendor)
 
     def save(self, commit=True):
         self.instance.vendor = self._user.vendor
         super().save(commit)
+        if hasattr(self, '_image_list'):
+            for image in self._image_list:
+                self.instance.images.create(
+                    image=image,
+                    name=image.name,
+                    owner=self.instance.vendor.user
+                )
