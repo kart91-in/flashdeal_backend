@@ -64,8 +64,6 @@
           <td class="a-right a-right ">
             {% if catalog.is_submitted %}
               --
-            {% elif catalog.is_verified %}
-              <a href="{% url 'flashdeal:flashdeal_create' %}?catalog_id={{ catalog.id }}" class="btn btn-primary">FlashDeal</a>
             {% else %}
               <a href="{% url 'flashdeal:catalog_submit' pk=catalog.id %}" class="btn btn-success">Submit</a>
             {% endif %}

@@ -30,14 +30,14 @@ class LeftBarMixin(object):
                         'text': 'Add a Catalog',
                         'url': reverse('flashdeal:catalog_create'),
                     },
-                    {
-                        'text': 'Flash Deal list',
-                        'url': reverse('flashdeal:flashdeal_list'),
-                    },
-                    {
-                        'text': 'Create a Flash Deal',
-                        'url': reverse('flashdeal:flashdeal_create'),
-                    },
+                    # {
+                    #     'text': 'Flash Deal list',
+                    #     'url': reverse('flashdeal:flashdeal_list'),
+                    # },
+                    # {
+                    #     'text': 'Create a Flash Deal',
+                    #     'url': reverse('flashdeal:flashdeal_create'),
+                    # },
                 ]
             },
         ]

@@ -6,6 +6,7 @@ from core.models import BaseModel
 
 class FlashDeal(BaseModel):
 
+    name = models.CharField(max_length=500, blank=True, null=True)
     start_time = models.DateTimeField(blank=True, null=True)
     end_time = models.DateTimeField(blank=True, null=True)
     catalog = models.ForeignKey('flashdeal.Catalog', on_delete=models.CASCADE)

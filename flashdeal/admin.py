@@ -25,8 +25,8 @@ class VendorAdmin(admin.ModelAdmin):
         approve = reverse('admin:approve-vendor', args=[obj.pk])
         reject = reverse('admin:reject-vendor', args=[obj.pk])
 
-        return format_html(f'<a class="button" href="{approve}">Approve</a> '
-                           f'<a class="button danger" href="{reject}">Reject</a> ')
+        return format_html(f'<a onclick="return confirm(\'Do you really want to approve this vendor?\');"  class="button" href="{approve}">Approve</a> '
+                           f'<a onclick="return confirm(\'Do you really want to reject this vendor?\');"  class="button danger" href="{reject}">Reject</a> ')
 
     def get_urls(self):
         urls = super().get_urls()
@@ -135,13 +135,16 @@ class CatalogAdmin(admin.ModelAdmin):
         return f'{obj.products.all().count()} product(s)'
 
     def catalog_actions(self, obj):
-        if obj.status != Catalog.STATUS_SUBMITTED:
-            return '--'
-        approve = reverse('admin:approve-catalog', args=[obj.pk])
-        reject = reverse('admin:reject-catalog', args=[obj.pk])
+        if obj.status == Catalog.STATUS_VERIFIED:
+            create_flashdeal = reverse('admin:flashdeal_flashdeal_add') + f'?catalog={obj.pk}'
+            return format_html(f'<a target="_blank" class="button" href="{create_flashdeal}">FlashDeal</a>')
 
-        return format_html(f'<a class="button" href="{approve}">Approve</a> '
-                           f'<a class="button danger" href="{reject}">Reject</a> ')
+        if obj.status == Catalog.STATUS_SUBMITTED:
+            approve = reverse('admin:approve-catalog', args=[obj.pk])
+            reject = reverse('admin:reject-catalog', args=[obj.pk])
+            return format_html(f'<a onclick="return confirm(\'Do you really want to approve this catalog?\');" class="button" href="{approve}">Approve</a> '
+                               f'<a onclick="return confirm(\'Do you really want to reject this catalog?\');" class="button danger" href="{reject}">Reject</a> ')
+        return '--'
 
     def get_urls(self):
         urls = super().get_urls()
@@ -197,4 +200,5 @@ class FlashDealAdmin(admin.ModelAdmin):
 
     list_display = ('catalog', 'start_time', 'end_time', 'created_at')
     list_filter = ('catalog', )
+
 
