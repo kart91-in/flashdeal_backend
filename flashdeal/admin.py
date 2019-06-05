@@ -5,7 +5,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse, path
 from django.utils.html import format_html
 from flashdeal.forms import AddLogNoteForm
-from flashdeal.models import Product, Image, Catalog
+from flashdeal.models import Product, Image, Catalog, Video, FlashDeal
 from flashdeal.models.vendor_models import Vendor, VendorApprovalLog
 
 
@@ -74,7 +74,7 @@ class VendorAdmin(admin.ModelAdmin):
             else:
                 self.message_user(request, form.errors[0], messages.ERROR)
             return self.to_change_list()
-        return TemplateResponse(request, 'admin/flashdeal/vendor/form_submit.html', context)
+        return TemplateResponse(request, 'admin/flashdeal/form_submit.html', context)
 
 
 @admin.register(VendorApprovalLog)
@@ -106,12 +106,95 @@ class ProductAdmin(admin.ModelAdmin):
         return obj.image.url
 
 
+class CatalogImageInline(admin.TabularInline):
+    model = Catalog.images.through
+    extra = 1
+    readonly_fields = ('preview', )
+
+    def preview(self, obj):
+        return format_html(f'<img src="{obj.image.image.url}" height=100 />')
+
+
+class CatalogVideoInline(admin.TabularInline):
+    model = Catalog.videos.through
+    extra = 1
+    readonly_fields = ('preview', )
+
+    def preview(self, obj):
+        return format_html(f'<video width="320" height= "240" controls><source src="{obj.video.video.url}" type="video/mp4"></video>')
+
+
 @admin.register(Catalog)
 class CatalogAdmin(admin.ModelAdmin):
 
-    list_display = ('name', 'vendor', 'status', 'created_at', 'product_count')
+    list_display = ('name', 'vendor', 'status', 'created_at', 'product_count', 'catalog_actions')
     list_filter = ('status', )
+    inlines = (CatalogImageInline, CatalogVideoInline)
 
     def product_count(self, obj):
         return f'{obj.products.all().count()} product(s)'
+
+    def catalog_actions(self, obj):
+        if obj.status != Catalog.STATUS_SUBMITTED:
+            return '--'
+        approve = reverse('admin:approve-catalog', args=[obj.pk])
+        reject = reverse('admin:reject-catalog', args=[obj.pk])
+
+        return format_html(f'<a class="button" href="{approve}">Approve</a> '
+                           f'<a class="button danger" href="{reject}">Reject</a> ')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/approve/',
+                self.admin_site.admin_view(self.approve_catalog),
+                name='approve-catalog',
+            ),
+            path(
+                '<path:object_id>/reject/',
+                self.admin_site.admin_view(self.reject_catalog),
+                name='reject-catalog',
+            ),
+        ]
+        return custom_urls + urls
+
+    def to_change_list(self):
+        info = self.model._meta.app_label, self.model._meta.model_name
+        return redirect(reverse('admin:%s_%s_changelist' % info))
+
+    def approve_catalog(self, request, object_id, *args, **kwargs):
+        try:
+            vendor = self.get_object(request, object_id)
+            vendor.approve(by_user=request.user)
+            self.message_user(request, 'Approved Catalog', messages.SUCCESS)
+        except ValidationError as e:
+            self.message_user(request, e.message, messages.ERROR)
+        return self.to_change_list()
+
+    def reject_catalog(self, request, object_id, *args, **kwargs):
+        context = self.admin_site.each_context(request)
+        if request.method != 'POST':
+            context['form'] = AddLogNoteForm()
+        else:
+            form = AddLogNoteForm(request.POST)
+            if form.is_valid():
+                try:
+                    note = form.cleaned_data['note']
+                    vendor = self.get_object(request, object_id)
+                    vendor.reject(by_user=request.user, note=note)
+                    self.message_user(request, 'Rejected Catalog', messages.SUCCESS)
+                except ValidationError as e:
+                    self.message_user(request, e.message, messages.ERROR)
+            else:
+                self.message_user(request, form.errors[0], messages.ERROR)
+            return self.to_change_list()
+        return TemplateResponse(request, 'admin/flashdeal/form_submit.html', context)
+
+
+@admin.register(FlashDeal)
+class FlashDealAdmin(admin.ModelAdmin):
+
+    list_display = ('catalog', 'start_time', 'end_time', 'created_at')
+    list_filter = ('catalog', )
 

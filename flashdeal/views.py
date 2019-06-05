@@ -1,8 +1,8 @@
 from django.urls import reverse
 from django.views import generic
 
-from flashdeal.forms import CreateProductForm, CreateCatalogForm
-from flashdeal.models import Product, Catalog
+from flashdeal.forms import CreateProductForm, CreateCatalogForm, CreateFlashDealForm
+from flashdeal.models import Product, Catalog, FlashDeal
 
 
 class LeftBarMixin(object):
@@ -29,7 +29,15 @@ class LeftBarMixin(object):
                     {
                         'text': 'Add a Catalog',
                         'url': reverse('flashdeal:catalog_create'),
-                    }
+                    },
+                    {
+                        'text': 'Flash Deal list',
+                        'url': reverse('flashdeal:flashdeal_list'),
+                    },
+                    {
+                        'text': 'Create a Flash Deal',
+                        'url': reverse('flashdeal:flashdeal_create'),
+                    },
                 ]
             },
         ]
@@ -65,15 +73,14 @@ class ProductCreateView(LeftBarMixin, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
+        kwargs.update({
+            'user': self.request.user,
+            '_image_list': self.request.FILES.getlist('image_list'),
+        })
         return kwargs
 
     def get_success_url(self):
         return reverse('flashdeal:product_list')
-
-    def form_valid(self, form):
-        form._image_list = self.request.FILES.getlist('image_list')
-        return super().form_valid(form)
 
 
 class CatalogListView(LeftBarMixin, generic.ListView):
@@ -99,8 +106,11 @@ class CatalogCreateView(LeftBarMixin, generic.CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        kwargs['_image_list'] = self.request.FILES.getlist('image_list')
+        kwargs.update({
+            'user': self.request.user,
+            '_image_list': self.request.FILES.getlist('image_list'),
+            '_video_list': self.request.FILES.getlist('video_list'),
+        })
         return kwargs
 
 
@@ -116,3 +126,31 @@ class CatalogSubmitView(generic.RedirectView):
         except Exception as e:
             self.request.session['error'] = e.message
         return super().get_redirect_url(*args, **kwargs)
+
+
+class FlashDealListView(LeftBarMixin, generic.ListView):
+
+    template_name = 'dashboard/flashdeal_list.html'
+
+    def get_queryset(self):
+        current_vendor = self.request.user.vendor
+        return FlashDeal.objects.filter(catalog__vendor=current_vendor)
+
+
+class FlashDealCreateView(LeftBarMixin, generic.CreateView):
+
+    template_name = 'dashboard/flashdeal_create.html'
+    form_class = CreateFlashDealForm
+
+    def get_success_url(self):
+        return reverse('flashdeal:flashdeal_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({
+            'user': self.request.user,
+            'catalog_id': self.request.GET.get('catalog_id'),
+        })
+        return kwargs
+
+    # def post(self, request, *args, **kwargs):
