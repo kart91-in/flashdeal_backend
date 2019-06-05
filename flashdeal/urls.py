@@ -1,7 +1,8 @@
 from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
-from flashdeal.apis import VendorRetrieveUpdateCreateAPI
+from flashdeal.apis import VendorRetrieveUpdateCreateAPI, UserRegisterAPI
 from flashdeal.views import ProductListView, ProductCreateView, \
     CatalogCreateView, CatalogListView, CatalogSubmitView, ProductDetailView, FlashDealCreateView, FlashDealListView
 
@@ -21,6 +22,11 @@ urlpatterns = [
 
     path('api/vendor/', VendorRetrieveUpdateCreateAPI.as_view(), name='post_vendor'),
     path('api/vendor/<int:pk>/', VendorRetrieveUpdateCreateAPI.as_view(), name='get_vendor'),
+
+    path('api/token/', obtain_jwt_token, name='token_create'),
+    path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),
+
+    path('api/user/register/', UserRegisterAPI.as_view(), name='user_register'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 

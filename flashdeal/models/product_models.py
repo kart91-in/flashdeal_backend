@@ -16,7 +16,7 @@ class Product(BaseModel):
 
     colors = models.ManyToManyField('ProductSize', blank=True, related_name='products',
                                     related_query_name='product')
-    sizes = models.ManyToManyField('ProductSize', blank=True, related_name='products',
+    sizes = models.ManyToManyField('ProductColor', blank=True, related_name='products',
                                     related_query_name='product')
 
     def sale_percent(self):
