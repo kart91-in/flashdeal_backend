@@ -19,6 +19,8 @@
 
   <!-- Custom Theme Style -->
   <link href="{% static "css/custom.min.css" %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+
 </head>
 
 <body class="nav-md">
@@ -177,5 +179,6 @@
 
 <!-- Custom Theme Scripts -->
 <script src="{% static "js/custom.min.js" %}"></script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

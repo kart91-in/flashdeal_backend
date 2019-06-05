@@ -1,0 +1,89 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block extra_css %}
+  <link href="{% static "vendors/bootstrap-daterangepicker/daterangepicker.css" %}" rel="stylesheet">
+  <link href="{% static "vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block page_title %}Create a Flashdeal{% endblock %}
+{% block main_content %}
+  <form class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12">Select Catalog*</label>
+      <div class="col-md-9 col-sm-9 col-xs-12">
+        {{ form.catalog }}
+        {{ form.catalog.error }}
+      </div>
+    </div>
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Start Time
+      </label>
+      <div class="col-sm-5 col-xs-12">
+        <div class='input-group date' id='startTimePicker'>
+          <input type='text' class="form-control" name="start_time" placeholder="Please blank mean start the flashdeal right now"/>
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        End Time
+      </label>
+      <div class="col-sm-5 col-xs-12">
+        <div class='input-group date' id='endTimePicker'>
+          <input type='text' class="form-control" name="end_time" placeholder="Please blank mean last forever"/>
+          <span class="input-group-addon">
+            <span class="glyphicon glyphicon-calendar"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Videos
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <input type="file" multiple name="video_list">
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Images
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <input type="file" multiple name="image_list">
+      </div>
+    </div>
+    {% if form.errors %}
+      {% for key, error in form.errors.items %}
+        <h4 class="label label-danger">{{ key }}: {{ error }}</h4>
+      {% endfor %}
+    {% endif %}
+    <div class="ln_solid"></div>
+    <div class="form-group">
+      <div class="col-md-6 col-md-offset-3">
+        <button type="submit" class="btn btn-primary">Cancel</button>
+        <button id="send" type="submit" class="btn btn-success">Submit</button>
+      </div>
+    </div>
+  </form>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'vendors/moment/min/moment.min.js' %}"></script>
+  <script src="{% static 'vendors/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+  <script src="{% static 'vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js' %}"></script>
+  <script>
+      $('#startTimePicker').datetimepicker({format: 'MM/DD/YYYY hh:mm'});
+      $('#endTimePicker').datetimepicker({format: 'MM/DD/YYYY hh:mm'});
+
+  </script>
+
+{% endblock %}
