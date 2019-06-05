@@ -1,20 +1,23 @@
 from decimal import Decimal
-
 from django.db import models
 from core.models import BaseModel
-from flashdeal.models.static_file_models import Image
-from flashdeal.models.vendor_models import Vendor
 
 
 class Product(BaseModel):
 
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
+    vendor = models.ForeignKey('flashdeal.Vendor', on_delete=models.PROTECT,
                              related_name='products', related_query_name='product')
     name = models.CharField(max_length=500)
     description = models.TextField(blank=True, null=True)
     upper_price = models.DecimalField(max_digits=10, decimal_places=2)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    images = models.ManyToManyField(Image, blank=True, related_name='products', related_query_name='product')
+    images = models.ManyToManyField('flashdeal.Image', blank=True, related_name='products',
+                                    related_query_name='product')
+
+    colors = models.ManyToManyField('ProductSize', blank=True, related_name='products',
+                                    related_query_name='product')
+    sizes = models.ManyToManyField('ProductSize', blank=True, related_name='products',
+                                    related_query_name='product')
 
     def sale_percent(self):
         upper_price = self.get_upper_price()
@@ -34,3 +37,15 @@ class Product(BaseModel):
         if self.catalogs.exists():
             return ','.join(list(self.catalogs.values_list('name', flat=True)))
         return '--'
+
+
+class ProductSize(BaseModel):
+
+    name = models.CharField(max_length=500)
+    value = models.CharField(max_length=500)
+
+
+class ProductColor(BaseModel):
+
+    name = models.CharField(max_length=500)
+    value = models.CharField(max_length=500)

@@ -27,23 +27,23 @@ class Vendor(BaseModel):
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
     def approve(self, by_user):
-        if self.status != Vendor.STATUS_NOT_VERIFIED:
+        if self.status != self.STATUS_NOT_VERIFIED:
             raise ValidationError('This Vendor is not in state to approve')
-        self.status = Vendor.STATUS_VERIFIED
+        self.status = self.STATUS_VERIFIED
         self.save()
         self.logs.create(user=by_user, type=VendorApprovalLog.TYPE_APPROVE)
 
     def reject(self, by_user, note):
-        if self.status != Vendor.STATUS_NOT_VERIFIED:
+        if self.status != self.STATUS_NOT_VERIFIED:
             raise ValidationError('This Vendor is not in state to reject')
-        self.status = Vendor.STATUS_REJECTED
+        self.status = self.STATUS_REJECTED
         self.save()
         self.logs.create(user=by_user, note=note, type=VendorApprovalLog.TYPE_REJECT)
 
     def disable(self, by_user, note):
-        if self.status == Vendor.STATUS_DISABLE:
+        if self.status == self.STATUS_DISABLE:
             raise ValidationError('This Vendor is not in state to disable')
-        self.status = Vendor.STATUS_DISABLE
+        self.status = self.STATUS_DISABLE
         self.save()
         self.logs.create(user=by_user, note=note, type=VendorApprovalLog.TYPE_DISABLE)
 

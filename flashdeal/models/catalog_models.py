@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from core.models import BaseModel, BaseApprovalLogModel
-from flashdeal.models import Vendor, Product, Image
 
 
 class Catalog(BaseModel):
@@ -22,11 +21,15 @@ class Catalog(BaseModel):
 
     name = models.CharField(max_length=500)
     description = models.TextField(blank=True, null=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, related_name='catalogs',
+    vendor = models.ForeignKey('flashdeal.Vendor', on_delete=models.PROTECT, related_name='catalogs',
                                related_query_name='catalog')
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
-    products = models.ManyToManyField(Product, blank=True, related_name='catalogs', related_query_name='catalog')
-    images = models.ManyToManyField(Image, blank=True, related_name='catalogs', related_query_name='catalog')
+    products = models.ManyToManyField('flashdeal.Product', blank=True, related_name='catalogs', related_query_name='catalog')
+    images = models.ManyToManyField('flashdeal.Image', blank=True, related_name='catalogs', related_query_name='catalog')
+    videos = models.ManyToManyField('flashdeal.Video', blank=True, related_name='catalogs', related_query_name='catalog')
+
+    def is_verified(self):
+        return self.status == self.STATUS_VERIFIED
 
     def is_submitted(self):
         return self.status == self.STATUS_SUBMITTED
@@ -44,14 +47,14 @@ class Catalog(BaseModel):
         self.logs.create(user=self.vendor.user, type=CatalogApprovalLog.TYPE_SUBMIT)
 
     def approve(self, by_user):
-        if self.status != self.STATUS_NOT_VERIFIED:
+        if not self.is_submitted():
             raise ValidationError('This Catalog is not in state to approve')
         self.status = self.STATUS_VERIFIED
         self.save()
         self.logs.create(user=by_user, type=CatalogApprovalLog.TYPE_APPROVE)
 
     def reject(self, by_user, note):
-        if self.status != self.STATUS_NOT_VERIFIED:
+        if not self.is_submitted():
             raise ValidationError('This Catalog is not in state to reject')
         self.status = self.STATUS_REJECTED
         self.save()
