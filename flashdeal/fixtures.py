@@ -11,7 +11,7 @@ def gen_users(number=1, **kwargs):
     return [User.objects.create_user(
         username=fa.name()[0],
         email=fa.email()[0],
-        password='pass',
+        password='pass1234',
     ) for i in range(number)]
 
 def gen_vendors(number=1, **kwargs):
@@ -35,4 +35,5 @@ def gen_product_for_vendors(vendor_id=None, number=1, **kwargs):
         upper_price=100.59,
         sale_price=uniform(10.5, 100.5)
     ) for i in range(number)]
+
 

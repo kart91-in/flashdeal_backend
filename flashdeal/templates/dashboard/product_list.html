@@ -43,7 +43,7 @@
           <td class=" ">{{ product.catalogs_list }}</td>
           <td class=" ">
             {% if product.image_url %}
-              <img width="250" src="{{ product.image_url }}" alt="{{ product.name }}">
+              <img width="250" height="200" src="{{ product.image_url }}" alt="{{ product.name }}">
             {% else %}
               --
             {% endif %}
@@ -57,4 +57,3 @@
     </table>
   </div>
 {% endblock %}
-

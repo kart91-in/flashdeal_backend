@@ -32,6 +32,7 @@ class Catalog(BaseModel):
         return self.status == self.STATUS_VERIFIED
 
     def is_submitted(self):
+        self.get_status_display()
         return self.status == self.STATUS_SUBMITTED
 
     def image_url(self):

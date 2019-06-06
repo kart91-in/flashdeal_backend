@@ -2,37 +2,142 @@
 {% load static %}
 {% block page_title %}Create a Product{% endblock %}
 {% block main_content %}
-  <form class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
+  <form id="product-form" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-    {% for field in form %}
-      <div class="item form-group">
-        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ field.id_for_label }}">
-          {{ field.name|title }} <span class="required">*</span>
-        </label>
-        <div class="col-md-6 col-sm-6 col-xs-12">
-          {{ field }}
-          {{ field.errors }}
-        </div>
-      </div>
-    {% endfor %}
+
+    {#    {% for field in form %}#}
+    {#      <div class="item form-group">#}
+    {#        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ field.id_for_label }}">#}
+    {#          {{ field.name|title }} <span class="required">*</span>#}
+    {#        </label>#}
+    {#        <div class="col-md-6 col-sm-6 col-xs-12">#}
+    {#          {{ field }}#}
+    {#          {{ field.errors }}#}
+    {#        </div>#}
+    {#      </div>#}
+    {#    {% endfor %}#}
 
     <div class="item form-group">
-      <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ field.id_for_label }}">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Name<span class="required">*</span>
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <input type="text" class="form-control" placeholder="Name" name="name">
+        {{ field.name.errors }}
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Description<span class="required">*</span>
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <textarea class="resizable_textarea form-control" name="description"></textarea>
+        {{ field.description.errors }}
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Sale price<span class="required">*</span>
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <input type="number" step="0.01" class="form-control" placeholder="59.95" name="sale_price">
+        {{ field.sale_price.errors }}
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12" >
+        Upper price<span class="required">*</span> <br> (to show how much you sale)
+      </label>
+      <div class="col-md-6 col-sm-6 col-xs-12">
+        <input type="number" class="form-control" placeholder="99.95" name="upper_price">
+        {{ field.upper_price.errors }}
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12">
         Images
       </label>
       <div class="col-md-6 col-sm-6 col-xs-12">
-        <input type="file" multiple name="image_list" required>
+        <input type="file" multiple name="image_list" >
       </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12">
+        Sizes availables
+      </label>
+      <div class="col-sm-4 col-xs-12">
+        <select name="sizes" id="size_select" class="form-control" required multiple>
+          {% for value, label in form.sizes.field.choices %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="item form-group">
+      <label class="control-label col-md-3 col-sm-3 col-xs-12">
+        Colors availables
+      </label>
+      <div class="col-sm-4 col-xs-12">
+        <select name="colors" id="color_select" class="form-control" required multiple>
+          {% for color in form.colors.field.queryset %}
+            <option data-color="{{ color.value }}" value="{{ color.id }}">{{ color.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="item form-group">
+      {{ form.errors }}
     </div>
 
     <div class="ln_solid"></div>
     <div class="form-group">
       <div class="col-md-6 col-md-offset-3">
-        <button type="submit" class="btn btn-primary">Cancel</button>
-        <button id="send" type="submit" class="btn btn-success">Submit</button>
+        <button type="submit" class="btn btn-success">Submit</button>
       </div>
     </div>
   </form>
 
 {% endblock %}
 
+{% block extra_css %}
+  <link href="{% static "css/select2.min.css" %}" rel="stylesheet">
+  <link href="{% static "css/fileinput.min.css" %}" rel="stylesheet">
+{% endblock %}
+{% block extra_js %}
+
+  <script src="{% static "js/select2.min.js" %}"></script>
+  <script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
+  <script src="{% static "js/fileinput.min.js" %}"></script>
+  <script>
+      $(document).on('ready', function() {
+          $("#size_select").select2();
+          $("#color_select").select2({
+              templateResult: state => {
+                  if (!state.id) {
+                      return state.text;
+                  }
+                  return $('<span style="padding: 10px 5px;"><canvas width="15" height="15" style="background-color:'
+                      + state.element.dataset.color + ';"/>  ' + state.text +'</span>');
+              },
+
+          });
+          $("input[name=image_list]").fileinput({
+              maxFileCount: 7,
+              required: true,
+              showUpload: false,
+              validateInitialCount: true,
+              overwriteInitial: false,
+              maxFilePreviewSize: 10240 * 5,
+              allowedFileTypes: ['image'],
+          });
+      });
+
+  </script>
+{% endblock %}

@@ -2,9 +2,11 @@ from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
-from flashdeal.apis import VendorRetrieveUpdateCreateAPI, UserRegisterAPI
-from flashdeal.views import ProductListView, ProductCreateView, \
-    CatalogCreateView, CatalogListView, CatalogSubmitView, ProductDetailView, FlashDealCreateView, FlashDealListView
+from flashdeal.apis.user_apis import UserRegisterAPI
+from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI
+from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
+from flashdeal.views.flashdeal_views import FlashDealCreateView, FlashDealListView
+from flashdeal.views.product_views import ProductListView, ProductDetailView, ProductCreateView
 
 app_name = 'flashdeal'
 

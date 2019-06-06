@@ -2,6 +2,7 @@ from django import forms
 from django.urls import reverse
 
 from flashdeal.models import Product, Image, Catalog, FlashDeal
+from flashdeal.models.product_models import ProductColor, ProductSize
 
 
 class AddLogNoteForm(forms.Form):
@@ -16,15 +17,15 @@ class AddLogNoteForm(forms.Form):
 class CreateProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ('name', 'description', 'sale_price', 'upper_price',)
+        fields = ('name', 'description', 'sale_price', 'upper_price', 'colors', 'sizes')
 
     name = forms.CharField()
-    description = forms.CharField(
-        widget=forms.Textarea,
-    )
+    description = forms.CharField()
     sale_price = forms.DecimalField()
     upper_price = forms.DecimalField(required=False)
-    catalogs = forms.ModelMultipleChoiceField(queryset=Catalog.objects.all())
+    catalogs = forms.ModelMultipleChoiceField(queryset=Catalog.objects, required=False)
+    colors = forms.ModelMultipleChoiceField(queryset=ProductColor.objects)
+    sizes = forms.ModelMultipleChoiceField(queryset=ProductSize.objects)
 
     def __init__(self, *args, **kwargs):
         self._user = kwargs.pop('user')
