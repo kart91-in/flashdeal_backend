@@ -6,6 +6,7 @@ from django.urls import reverse, path
 from django.utils.html import format_html
 from flashdeal.forms import AddLogNoteForm
 from flashdeal.models import Product, Image, Catalog, Video, FlashDeal
+from flashdeal.models.product_models import ProductSizeStock
 from flashdeal.models.vendor_models import Vendor, VendorApprovalLog
 
 
@@ -86,24 +87,27 @@ class VendorApprovalLogAdmin(admin.ModelAdmin):
         return obj.user
 
 
+class ImageProductInline(admin.TabularInline):
+    model = ProductSizeStock
+    extra = 1
+    fields = ('size', 'stock', 'preview')
+    readonly_fields = ('preview', )
+
+
+    def preview(self, obj):
+        return format_html(f'<img src="{obj.image.image.url}" height=100 />')
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
 
     list_display = ('vendor', 'name', 'image_url', 'sale_price', 'upper_price', 'created_at', )
+    inlines = (ImageProductInline, )
 
     def image_url(self, obj):
         image_url = obj.image_url()
         if not image_url: return '---'
         return format_html(f'<img width=100 src={image_url}/>')
-
-
-@admin.register(Image)
-class ProductAdmin(admin.ModelAdmin):
-
-    list_display = ('name', 'image_url', 'owner', 'created_at', )
-
-    def image_url(self, obj):
-        return obj.image.url
 
 
 class CatalogImageInline(admin.TabularInline):

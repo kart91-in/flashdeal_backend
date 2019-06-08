@@ -1,8 +1,9 @@
 from django import forms
+from django.db import transaction
 from django.urls import reverse
 
 from flashdeal.models import Product, Image, Catalog, FlashDeal
-from flashdeal.models.product_models import ProductColor, ProductSize
+from flashdeal.models.product_models import ProductColor, ProductSize, ProductSizeStock
 
 
 class AddLogNoteForm(forms.Form):
@@ -18,28 +19,26 @@ class MetaFieldMixin(object):
     """
     Underscore will be added to the fields
     """
-    meta_fields = ('user')
+    meta_fields = ('user', )
 
     def __init__(self, *args, **kwargs):
         for field in self.meta_fields:
             setattr(self, f'_{field}', kwargs.pop(field, None))
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class CreateProductForm(MetaFieldMixin, forms.ModelForm):
     class Meta:
         model = Product
-        fields = ('name', 'description', 'sale_price', 'upper_price', 'colors', 'sizes')
+        fields = ('name', 'description', 'sale_price', 'upper_price', 'colors')
 
     name = forms.CharField()
     description = forms.CharField()
     sale_price = forms.DecimalField()
     upper_price = forms.DecimalField(required=False)
     catalogs = forms.ModelMultipleChoiceField(queryset=Catalog.objects, required=False)
-    colors = forms.ModelMultipleChoiceField(queryset=ProductColor.objects)
-    sizes = forms.ModelMultipleChoiceField(queryset=ProductSize.objects)
 
-    meta_fields = ('user', 'image_list', 'size_list', 'stock_list')
+    colors = forms.ModelMultipleChoiceField(queryset=ProductColor.objects)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,15 +46,37 @@ class CreateProductForm(MetaFieldMixin, forms.ModelForm):
             vendor=self._user.vendor
         )
 
+    def clean(self):
+        print(self.data)
+        cleaned_data = super().clean()
+        size_list = []
+        stock_list = []
+        self.image_list = self.files.getlist('image_list')
+        for i in range(len(self.image_list)):
+            size_list.append(self.data.get(f'size_image_{i}'))
+            stock_list.append(self.data.get(f'stock_image_{i}'))
+        self.size_list = size_list
+        self.stock_list = stock_list
+        return cleaned_data
+
+    @transaction.atomic
     def save(self, commit=True):
         self.instance.vendor = self._user.vendor
         super().save(commit)
-        for image in self._image_list:
-            self.instance.images.create(
-                image=image,
-                name=image.name,
+        for i in range(len(self.image_list)):
+            image_file = self.image_list[i]
+            image = Image.objects.create(
+                image=image_file,
+                name=image_file.name,
                 owner=self._user
             )
+            ProductSizeStock.objects.create(
+                image=image,
+                product=self.instance,
+                stock=self.stock_list[i],
+                size_id=self.size_list[i],
+            )
+        return self.instance
 
 
 class CreateCatalogForm(forms.ModelForm):
@@ -86,6 +107,8 @@ class CreateCatalogForm(forms.ModelForm):
                 name=video.name,
                 owner=self._user
             )
+        return self.instance
+
 
 
 class CreateFlashDealForm(forms.ModelForm):

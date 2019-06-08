@@ -5,18 +5,6 @@
   <form id="product-form" class="form-horizontal form-label-left" enctype="multipart/form-data" method="post">
     {% csrf_token %}
 
-    {#    {% for field in form %}#}
-    {#      <div class="item form-group">#}
-    {#        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="{{ field.id_for_label }}">#}
-    {#          {{ field.name|title }} <span class="required">*</span>#}
-    {#        </label>#}
-    {#        <div class="col-md-6 col-sm-6 col-xs-12">#}
-    {#          {{ field }}#}
-    {#          {{ field.errors }}#}
-    {#        </div>#}
-    {#      </div>#}
-    {#    {% endfor %}#}
-
     <div class="item form-group">
       <label class="control-label col-md-3 col-sm-3 col-xs-12" >
         Name<span class="required">*</span>
@@ -59,29 +47,18 @@
 
     <div class="item form-group">
       <label class="control-label col-md-3 col-sm-3 col-xs-12">
-        Images
+        Images (max 7)
       </label>
       <div class="col-md-6 col-sm-6 col-xs-12">
         <input type="file" multiple name="image_list" >
       </div>
     </div>
-
-    <div class="item form-group">
-      <label class="control-label col-md-3 col-sm-3 col-xs-12">
-        Sizes availables
-      </label>
-      <div class="col-sm-4 col-xs-12">
-        <select name="sizes" id="size_select" class="form-control" required multiple>
-          {% for value, label in form.sizes.field.choices %}
-            <option value="{{ value }}">{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+    <div class="item form-group" id="preview-images">
     </div>
 
     <div class="item form-group">
       <label class="control-label col-md-3 col-sm-3 col-xs-12">
-        Colors availables
+        Colors available
       </label>
       <div class="col-sm-4 col-xs-12">
         <select name="colors" id="color_select" class="form-control" required multiple>
@@ -92,9 +69,11 @@
       </div>
     </div>
 
-    <div class="item form-group">
-      {{ form.errors }}
-    </div>
+    {% if form.errors %}
+      <div class="item form-group">
+        {{ form.errors }}
+      </div>
+    {% endif %}
 
     <div class="ln_solid"></div>
     <div class="form-group">
@@ -103,7 +82,29 @@
       </div>
     </div>
   </form>
+  <div style="display: none" id="imageElModel">
+    <div class="col-md-55">
+      <div class="thumbnail">
+        <div class="image view view-first">
+          <img style="width: 100%; display: block;" src="#" alt="image" />
+        </div>
+        <div class="caption">
+          <div class="item form-group">
+            <select name="sizes" id="size_select" class="form-control" required>
+              <option></option>
+              {% for value, label in form.sizes.field.choices %}
+                <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
+          <div class="item form-group">
+            <input type="number" class="form-control stock_input" placeholder="Stock amount (default 1)" required>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block extra_css %}
@@ -116,8 +117,23 @@
   <script src="{% static "js/bootstrap.bundle.min.js" %}"></script>
   <script src="{% static "js/fileinput.min.js" %}"></script>
   <script>
+      function readURL(file, imgEl) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+              imgEl.attr('src', e.target.result);
+          };
+          reader.readAsDataURL(file);
+      }
+      imgEl = function(id){
+          el = $('#imageElModel').children().clone();
+          el.find('img').attr('id', id);
+          el.find('#size_select').attr('id', 'size_select_' + id).attr('name', 'size_' + id);
+          el.find('.stock_input').attr('name', 'stock_' + id);
+          return el;
+      };
       $(document).on('ready', function() {
-          $("#size_select").select2();
+          image_container = $('#preview-images');
+
           $("#color_select").select2({
               templateResult: state => {
                   if (!state.id) {
@@ -131,11 +147,24 @@
           $("input[name=image_list]").fileinput({
               maxFileCount: 7,
               required: true,
+              showPreview: false,
               showUpload: false,
               validateInitialCount: true,
               overwriteInitial: false,
               maxFilePreviewSize: 10240 * 5,
               allowedFileTypes: ['image'],
+          }).on('change', function(e){
+              image_container.empty();
+              for(i=0; i < this.files.length; i++ ){
+                  id = 'image_' + i;
+                  image_container.append(imgEl(id));
+                  readURL(this.files[i], $('#' + id));
+                  $("#size_select_" + id).select2({
+                      placeholder: "Select a size"
+                  });
+              }
+          }).on('filecleared', function(event) {
+              image_container.empty();
           });
       });
 
