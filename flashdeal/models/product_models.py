@@ -12,10 +12,11 @@ class Product(BaseModel):
     upper_price = models.DecimalField(max_digits=10, decimal_places=2)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     images = models.ManyToManyField('flashdeal.Image', blank=True, related_name='products',
-                                    related_query_name='product')
+                                    related_query_name='product', through='ProductSizeStock')
 
     sizes = models.ManyToManyField('ProductSize', blank=True, related_name='products',
-                                    related_query_name='product')
+                                    related_query_name='product', through='ProductSizeStock')
+
     colors = models.ManyToManyField('ProductColor', blank=True, related_name='products',
                                     related_query_name='product')
 
@@ -37,6 +38,14 @@ class Product(BaseModel):
         if self.catalogs.exists():
             return ','.join(list(self.catalogs.values_list('name', flat=True)))
         return '--'
+
+#
+class ProductSizeStock(BaseModel):
+
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    size = models.ForeignKey('ProductSize', on_delete=models.CASCADE)
+    image = models.ForeignKey('flashdeal.Image', on_delete=models.CASCADE)
+    stock = models.PositiveSmallIntegerField(default=0)
 
 
 class ProductSize(BaseModel):

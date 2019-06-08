@@ -15,9 +15,11 @@ class CatalogListView(LeftBarMixin, generic.ListView):
         return Catalog.objects.filter(vendor=current_vendor)
 
     def get_context_data(self, **kwargs):
-        kwargs['message'] = self.request.session.pop('message', None)
-        kwargs['error'] = self.request.session.pop('error', None)
-        return super().get_context_data(**kwargs)
+        return super().get_context_data(**{
+            **kwargs,
+            'message': self.request.session.pop('message', None),
+            'error': self.request.session.pop('error', None)
+        })
 
 
 class CatalogCreateView(LeftBarMixin, generic.CreateView):
@@ -28,13 +30,10 @@ class CatalogCreateView(LeftBarMixin, generic.CreateView):
         return reverse('flashdeal:catalog_list')
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update({
+        return {
+            **super().get_form_kwargs(),
             'user': self.request.user,
-            '_image_list': self.request.FILES.getlist('image_list'),
-            '_video_list': self.request.FILES.getlist('video_list'),
-        })
-        return kwargs
+        }
 
 
 class CatalogSubmitView(generic.RedirectView):

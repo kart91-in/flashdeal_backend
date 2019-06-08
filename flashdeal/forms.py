@@ -14,7 +14,19 @@ class AddLogNoteForm(forms.Form):
     )
 
 
-class CreateProductForm(forms.ModelForm):
+class MetaFieldMixin(object):
+    """
+    Underscore will be added to the fields
+    """
+    meta_fields = ('user')
+
+    def __init__(self, *args, **kwargs):
+        for field in self.meta_fields:
+            setattr(self, f'_{field}', kwargs.pop(field, None))
+        super().__init__(self, *args, **kwargs)
+
+
+class CreateProductForm(MetaFieldMixin, forms.ModelForm):
     class Meta:
         model = Product
         fields = ('name', 'description', 'sale_price', 'upper_price', 'colors', 'sizes')
@@ -27,9 +39,9 @@ class CreateProductForm(forms.ModelForm):
     colors = forms.ModelMultipleChoiceField(queryset=ProductColor.objects)
     sizes = forms.ModelMultipleChoiceField(queryset=ProductSize.objects)
 
+    meta_fields = ('user', 'image_list', 'size_list', 'stock_list')
+
     def __init__(self, *args, **kwargs):
-        self._user = kwargs.pop('user')
-        self._image_list = kwargs.pop('_image_list', [])
         super().__init__(*args, **kwargs)
         self.fields['catalogs'].queryset = Catalog.objects.filter(
             vendor=self._user.vendor
