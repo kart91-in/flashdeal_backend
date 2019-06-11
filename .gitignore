@@ -4,3 +4,4 @@ __pycache__
 media
 sample.py
 gentelella
+/core/settings/local.py
