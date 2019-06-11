@@ -156,4 +156,5 @@ REST_FRAMEWORK = {
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=6),
     'JWT_AUTH_HEADER_PREFIX': 'Token',
+    'JWT_ALLOW_REFRESH': True,
 }

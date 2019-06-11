@@ -93,7 +93,6 @@ class ImageProductInline(admin.TabularInline):
     fields = ('size', 'stock', 'preview')
     readonly_fields = ('preview', )
 
-
     def preview(self, obj):
         return format_html(f'<img src="{obj.image.image.url}" height=100 />')
 

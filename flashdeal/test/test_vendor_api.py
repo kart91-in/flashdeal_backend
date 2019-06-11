@@ -9,6 +9,7 @@ class VendorTest(BaseTest):
 
     def setUp(self):
         super().setUp()
+        self.login_user()
         vendor_user = User.objects.create_user('username', 'email@gmail.com', 'password')
         self.data = {
             'user_id': vendor_user.id,

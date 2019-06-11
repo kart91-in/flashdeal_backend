@@ -39,7 +39,7 @@ class Product(BaseModel):
             return ','.join(list(self.catalogs.values_list('name', flat=True)))
         return '--'
 
-#
+
 class ProductSizeStock(BaseModel):
 
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
