@@ -7,9 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
-from flashdeal.models import UserProfile
 from flashdeal.otp_service import verify_otp, send_otp_message, resend_otp_message
-from flashdeal.serializers import UserSerializer
+from flashdeal.serializers.user_serializers import UserSerializer
 
 
 class UserRegisterAPI(CreateAPIView):

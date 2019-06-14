@@ -15,8 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import sys
 
-import django_heroku
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
@@ -94,8 +92,12 @@ DATABASES = {
 
 if 'test' in sys.argv:
     DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'test_db'
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'kart_test',
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'),
+        'PORT': '5432',
     }
 
 # Password validation
@@ -156,12 +158,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
     ),
 }
+
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=6),
     'JWT_AUTH_HEADER_PREFIX': 'Token',
     'JWT_ALLOW_REFRESH': True,
 }
-
-django_heroku.settings(locals())
 
 OTP_SERVICE_KEY = os.environ.get('OTP_SERVICE_KEY')

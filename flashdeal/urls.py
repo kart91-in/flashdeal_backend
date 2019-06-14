@@ -2,6 +2,9 @@ from django.urls import path, include
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
+from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
+from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI
+from flashdeal.apis.payment_apis import PaymentRetrieveCreateDeleteAPI
 from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI
 from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI
 from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
@@ -24,6 +27,14 @@ urlpatterns = [
 
     path('api/vendor/', VendorRetrieveUpdateCreateAPI.as_view(), name='post_vendor'),
     path('api/vendor/<int:pk>/', VendorRetrieveUpdateCreateAPI.as_view(), name='get_vendor'),
+
+    path('api/basket/products/add/', BasketRetrieveUpdateDeleteAPI.as_view(),
+         name='add_basket_product'),
+    path('api/basket/products/remove/', BasketRetrieveUpdateDeleteAPI.as_view(remove_product=True),
+         name='remove_basket_product'),
+
+    path('api/order/', OrderRetrieveUpdateDeleteAPI.as_view(), name='order'),
+    path('api/payment/', PaymentRetrieveCreateDeleteAPI.as_view(), name='payment'),
 
     path('api/token/', UserTokenAPI.as_view(), name='token_create'),
     path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),

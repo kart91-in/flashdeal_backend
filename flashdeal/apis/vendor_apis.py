@@ -1,7 +1,7 @@
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, mixins
 from rest_framework.permissions import IsAuthenticated
 from flashdeal.models.vendor_models import Vendor
-from flashdeal.serializers import VendorSerializer
+from flashdeal.serializers.vendor_serializers import VendorSerializer
 
 
 class VendorRetrieveUpdateCreateAPI(mixins.CreateModelMixin, RetrieveUpdateAPIView):

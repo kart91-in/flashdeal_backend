@@ -37,3 +37,11 @@ def gen_product_for_vendors(vendor_id=None, number=1, **kwargs):
     ) for i in range(number)]
 
 
+def gen_products(product_count, vendor_count=1):
+    products = []
+    vendors = gen_vendors(vendor_count)
+
+    for vendor in vendors:
+        products += gen_product_for_vendors(vendor.pk, product_count)
+    return products
+

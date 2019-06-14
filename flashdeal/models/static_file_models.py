@@ -11,6 +11,9 @@ class Image(BaseModel):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.ImageField(upload_to=image_dir_path)
 
+    def url(self):
+        return self.image.url
+
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
         if self.image and not self.name:
