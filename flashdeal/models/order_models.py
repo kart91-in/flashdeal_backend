@@ -47,7 +47,7 @@ class Order(BaseModel):
     alternate_contact = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
-        return f'Order {self.pk}: {self.name}'
+        return 'Order %s: %s' % (self.id, self.name)
 
     @property
     def status_text(self):
