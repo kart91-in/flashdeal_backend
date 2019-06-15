@@ -166,3 +166,4 @@ JWT_AUTH = {
 }
 
 OTP_SERVICE_KEY = os.environ.get('OTP_SERVICE_KEY')
+STATIC_ROOT = os.path.dirname(BASE_DIR) + '/static'
