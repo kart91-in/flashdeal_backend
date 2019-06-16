@@ -54,7 +54,7 @@ class ProductTest(BaseTest):
 
     def test_create_product(self):
         url = reverse('flashdeal:product')
-
+        print(self.data)
         resp = self.client.post(url, data=self.data, format='multipart')
         data = resp.json()
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)

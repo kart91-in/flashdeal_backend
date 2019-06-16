@@ -4,7 +4,20 @@ from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAP
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from flashdeal.models import Product
-from flashdeal.serializers.product_serializers import ProductsSerializer
+from flashdeal.models.product_models import ProductColor
+from flashdeal.serializers.product_serializers import ProductsSerializer, ProductColorSerializer
+
+
+class ProductColorListAPI(ListAPIView):
+    permission_classes = (AllowAny, )
+    queryset = ProductColor.objects
+    serializer_class = ProductColorSerializer
+
+
+class ProductSizeListAPI(ListAPIView):
+    permission_classes = (AllowAny, )
+    queryset = ProductColor.objects
+    serializer_class = ProductColorSerializer
 
 
 class ProductListCreateAPI(ListCreateAPIView):

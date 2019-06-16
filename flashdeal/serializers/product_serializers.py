@@ -6,10 +6,23 @@ from flashdeal.models import Product, Image
 from flashdeal.models.product_models import ProductVariant, ProductColor, ProductSize
 
 
+class ProductColorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ProductColor
+        fields = ('id', 'name', 'value', )
+
+
+class ProductSizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSize
+        fields = ('id', 'name', 'value',)
+
+
 class ImagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('name', 'owner_id', 'url', )
+        fields = ('id', 'name', 'owner_id', 'url', )
 
 
 class ProductsVariantSerializer(serializers.ModelSerializer):

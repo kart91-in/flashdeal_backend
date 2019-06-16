@@ -6,7 +6,8 @@ from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
 from flashdeal.apis.catalog_apis import CatalogListCreateAPI
 from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI
 from flashdeal.apis.payment_apis import PaymentRetrieveCreateDeleteAPI
-from flashdeal.apis.product_apis import ProductListCreateAPI, ProductDestroyUpdateAPI
+from flashdeal.apis.product_apis import ProductListCreateAPI, \
+    ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
 from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI
 from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI
 from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
@@ -29,6 +30,9 @@ urlpatterns = [
     path('catalogs/<int:pk>/submit/', CatalogSubmitView.as_view(), name='catalog_submit'),
 
     path('api/catalogs/', CatalogListCreateAPI.as_view(), name='catalog'),
+
+    path('api/product/size/', ProductSizeListAPI.as_view(), name='product_size'),
+    path('api/product/color/', ProductColorListAPI.as_view(), name='product_color'),
 
     path('api/product/', ProductListCreateAPI.as_view(), name='product'),
     path('api/product/<int:pk>/', ProductDestroyUpdateAPI.as_view(), name='product_object'),
