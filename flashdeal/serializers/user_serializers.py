@@ -14,3 +14,5 @@ class UserSerializer(serializers.Serializer):
         )
         UserProfile.objects.create(user=user, phone=validated_data['phone'])
         return user
+
+

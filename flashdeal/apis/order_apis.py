@@ -1,11 +1,6 @@
-from django.db import transaction
-from rest_framework import status
 from rest_framework.generics import RetrieveUpdateAPIView, mixins
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
-from flashdeal.models import Basket, Product
-from flashdeal.serializers.basket_serializers import BasketSerializer
 from flashdeal.serializers.order_serializers import OrderSerializer
 
 
@@ -22,7 +17,5 @@ class OrderRetrieveUpdateDeleteAPI(mixins.CreateModelMixin,
             func = getattr(self, self.post_action)
             return func(request, *args, **kwargs)
         return self.create(request, *args, **kwargs)
-
-
 
 

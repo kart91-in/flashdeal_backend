@@ -3,7 +3,7 @@ from django.db import transaction
 from django.urls import reverse
 
 from flashdeal.models import Product, Image, Catalog, FlashDeal
-from flashdeal.models.product_models import ProductColor, ProductSize, ProductSizeStock
+from flashdeal.models.product_models import ProductColor, ProductSize
 
 
 class AddLogNoteForm(forms.Form):
@@ -70,12 +70,7 @@ class CreateProductForm(MetaFieldMixin, forms.ModelForm):
                 name=image_file.name,
                 owner=self._user
             )
-            ProductSizeStock.objects.create(
-                image=image,
-                product=self.instance,
-                stock=self.stock_list[i],
-                size_id=self.size_list[i],
-            )
+            self.instance.images.add(image)
         return self.instance
 
 

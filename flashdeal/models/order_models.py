@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Sum
 
 from core.models import BaseModel
+from flashdeal.contances import STATE_LIST
 
 
 class Basket(BaseModel):
@@ -24,11 +25,19 @@ class Order(BaseModel):
 
     STATUS = (
         (STATUS_DRAFT, 'Just created'),
-        (STATUS_PAYMENT, 'Paid'),
+        (STATUS_PAYMENT, 'Paid and processing'),
         (STATUS_VERIFIED, 'Vendor Received'),
         (STATUS_SHIPPED, 'Is Shipping'),
         (STATUS_DELIVERED, 'Delivered'),
         (STATUS_CANCELED, 'Canceled'),
+    )
+
+    TYPE_HOME_ADDRESS = 0
+    TYPE_HOME_OFFICE = 1
+
+    CUSTOMER_ADDRESS_TYPE = (
+        (TYPE_HOME_ADDRESS, 'home'),
+        (TYPE_HOME_OFFICE, 'office'),
     )
 
     products = models.ManyToManyField('flashdeal.Product', blank=False)
@@ -39,15 +48,21 @@ class Order(BaseModel):
 
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
-    name = models.CharField(max_length=500)
-    address = models.CharField(max_length=500)
-    phone = models.CharField(max_length=500)
+    customer_name = models.CharField(max_length=500)
+    customer_phone = models.CharField(max_length=500)
+    customer_address = models.CharField(max_length=500)
+    address_type = models.CharField(max_length=500, default=TYPE_HOME_ADDRESS, choices=CUSTOMER_ADDRESS_TYPE)
     city = models.CharField(max_length=500)
     pin_code = models.CharField(max_length=500)
-    alternate_contact = models.CharField(max_length=500, blank=True, null=True)
+    c_city = models.CharField(max_length=500)
+    c_state = models.CharField(max_length=500, choices=STATE_LIST)
+    alternate_customer_contact = models.CharField(max_length=500, blank=True, null=True)
+
+    delivery_info = models.OneToOneField('flashdeal.DeliveryInfo', null=True, blank=True, on_delete=models.PROTECT)
+
 
     def __str__(self):
-        return 'Order %s: %s' % (self.id, self.name)
+        return 'Order %s: %s' % (self.id, self.customer_name)
 
     @property
     def status_text(self):
@@ -63,6 +78,25 @@ class Order(BaseModel):
         self.payment = payment
         self.status = self.STATUS_PAYMENT
         self.save()
+
+
+class DeliveryInfo(BaseModel):
+
+    awb_number = models.CharField(max_length=500, primary_key=True)
+
+    actual_weight = models.PositiveIntegerField(default=0)
+    volumetric_weight = models.PositiveIntegerField(default=0)
+    pincode = models.PositiveIntegerField(default=0)
+
+    pickup_address = models.CharField(max_length=500)
+    pickup_address_pincode = models.PositiveIntegerField(default=0)
+
+    rto_name = models.CharField(max_length=500)
+    rto_city = models.CharField(max_length=500)
+    rto_state = models.CharField(max_length=500, choices=STATE_LIST)
+    rto_contact_no = models.CharField(max_length=500, blank=True, null=True)
+    rto_address = models.CharField(max_length=500, blank=True, null=True)
+    rto_pincode = models.PositiveIntegerField(default=0)
 
 
 class Tracking(BaseModel):

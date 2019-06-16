@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
@@ -14,15 +15,28 @@ class VendorTest(BaseTest):
         self.data = {
             'user_id': vendor_user.id,
             'name': 'name1',
+            'state': 'bihar',
             'email': 'company@gmail.com',
             'gstin_number': 1123123,
             'phone': 1123123,
         }
 
-    def test_create_valid_vendor_item(self):
+    def test_create_vendor_with_user(self):
+        self.data.update({
+            'username': 'user01',
+            'password': 'pass1234',
+        })
         url = reverse('flashdeal:post_vendor')
         resp = self.client.post(url, data=self.data)
 
+        user = User.objects.filter(username=self.data['username']).first()
+        self.assertEqual(user.id, resp.json()['user_id'])
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertIsNotNone(user)
+
+    def test_create_valid_vendor_item(self):
+        url = reverse('flashdeal:post_vendor')
+        resp = self.client.post(url, data=self.data)
         self.assertEqual(self.data['user_id'], resp.json()['user_id'])
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 

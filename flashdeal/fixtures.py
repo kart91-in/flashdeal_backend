@@ -14,6 +14,18 @@ def gen_users(number=1, **kwargs):
         password='pass1234',
     ) for i in range(number)]
 
+
+def add_vendor_profile(user):
+    fa = Faker()
+    return Vendor.objects.create(
+        user=user,
+        name=fa.company()[0],
+        email=fa.email()[0],
+        gstin_number=fa.random_number(6),
+        address=fa.address()
+    )
+
+
 def gen_vendors(number=1, **kwargs):
     fa = Faker()
     user = gen_users(number)[0]

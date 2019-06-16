@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from core.models import BaseModel, BaseApprovalLogModel
+from flashdeal.contances import STATE_LIST
 
 
 class Vendor(BaseModel):
@@ -23,8 +24,9 @@ class Vendor(BaseModel):
     email = models.EmailField(blank=True, null=True)
     gstin_number = models.CharField(max_length=500, blank=True, null=True)
     address = models.CharField(max_length=500, blank=True, null=True)
+    state = models.CharField(max_length=500, choices=STATE_LIST)
     phone = models.CharField(max_length=500, blank=True, null=True)
-    status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
+    status = models.PositiveSmallIntegerField(default=STATUS_NOT_VERIFIED, choices=STATUS)
 
     def approve(self, by_user):
         if self.status != self.STATUS_NOT_VERIFIED:

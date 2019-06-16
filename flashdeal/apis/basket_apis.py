@@ -13,9 +13,6 @@ class BasketRetrieveUpdateDeleteAPI(mixins.DestroyModelMixin, RetrieveUpdateAPIV
     serializer_class = BasketSerializer
     remove_product = False
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
     def get_object(self):
         user = self.request.user
         basket, _ = Basket.objects.get_or_create(user=user)
