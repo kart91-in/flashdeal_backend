@@ -11,20 +11,6 @@ from flashdeal.otp_service import verify_otp, send_otp_message, resend_otp_messa
 from flashdeal.serializers.user_serializers import UserSerializer
 
 
-class VendorUserRegisterAPI(CreateAPIView):
-
-    permission_classes = (permissions.AllowAny, )
-    serializer_class = UserSerializer
-
-    @transaction.atomic
-    def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
-        if send_otp_result.get('type') != 'success':
-            transaction.rollback()
-            return Response(send_otp_result, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_201_CREATED)
-
-
 class UserRegisterAPI(CreateAPIView):
 
     permission_classes = (permissions.AllowAny, )

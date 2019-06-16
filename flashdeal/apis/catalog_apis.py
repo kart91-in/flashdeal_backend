@@ -2,29 +2,29 @@ from rest_framework import mixins
 from rest_framework.generics import UpdateAPIView, CreateAPIView, ListAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from flashdeal.models import Product
-from flashdeal.serializers.product_serializers import ProductsSerializer
+from flashdeal.models import Product, Catalog
+from flashdeal.serializers.catalog_serializers import CatalogSerializer
 
 
-class ProductListCreateAPI(ListCreateAPIView):
+class CatalogListCreateAPI(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ProductsSerializer
+    serializer_class = CatalogSerializer
 
     def get_queryset(self):
-        return Product.objects.order_by('-created_at')
+        return Catalog.objects.order_by('-created_at')
 
     def get_permissions(self):
         if self.request.method == 'GET':
-            self.permission_classes = (AllowAny,)
+            self.permission_classes = (AllowAny, )
         return super().get_permissions()
 
 
-class ProductDestroyUpdateAPI(mixins.DestroyModelMixin, UpdateAPIView):
+class CatalogDestroyUpdateAPI(mixins.DestroyModelMixin, UpdateAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ProductsSerializer
+    serializer_class = CatalogSerializer
 
     def get_object(self):
-        return Product.objects.get(pk=self.kwargs.get('pk'))
+        return Catalog.objects.get(pk=self.kwargs.get('pk'))
 
     def delete(self, request, *argv, **kwargs):
         return self.destroy(request, *argv, **kwargs)

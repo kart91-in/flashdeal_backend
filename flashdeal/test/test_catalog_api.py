@@ -13,7 +13,7 @@ from flashdeal.models.product_models import ProductColor, ProductSize, Product
 from flashdeal.test.base_request_test import BaseTest
 
 
-class ProductTest(BaseTest):
+class CatalogTest(BaseTest):
     fixtures = ['colors.json', 'sizes.json']
 
     def setUp(self):

@@ -12,6 +12,7 @@ class UserSerializer(serializers.Serializer):
             username=validated_data['phone'],
             is_active=False,
         )
+        user.set_password(validated_data['phone'])
         UserProfile.objects.create(user=user, phone=validated_data['phone'])
         return user
 

@@ -37,6 +37,7 @@ def gen_vendors(number=1, **kwargs):
         address=fa.address()
     ) for i in range(number)]
 
+
 def gen_product_for_vendors(vendor_id=None, number=1, **kwargs):
     fa = Faker()
     if not vendor_id:

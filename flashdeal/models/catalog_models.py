@@ -23,10 +23,8 @@ class Catalog(BaseModel):
     description = models.TextField(blank=True, null=True)
     vendor = models.ForeignKey('flashdeal.Vendor', on_delete=models.PROTECT, related_name='catalogs',
                                related_query_name='catalog')
-    status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
+    status = models.PositiveSmallIntegerField(default=STATUS_NOT_VERIFIED, choices=STATUS)
     products = models.ManyToManyField('flashdeal.Product', blank=True, related_name='catalogs', related_query_name='catalog')
-    images = models.ManyToManyField('flashdeal.Image', blank=True, related_name='catalogs', related_query_name='catalog')
-    videos = models.ManyToManyField('flashdeal.Video', blank=True, related_name='catalogs', related_query_name='catalog')
 
     def is_verified(self):
         return self.status == self.STATUS_VERIFIED
@@ -34,11 +32,6 @@ class Catalog(BaseModel):
     def is_submitted(self):
         self.get_status_display()
         return self.status == self.STATUS_SUBMITTED
-
-    def image_url(self):
-        image = self.images.first()
-        if not image: return None
-        return image.image.url
 
     def submit_for_approval(self):
         if self.status not in [self.STATUS_REJECTED, self.STATUS_NOT_VERIFIED]:

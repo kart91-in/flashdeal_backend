@@ -97,30 +97,12 @@ class ProductAdmin(admin.ModelAdmin):
         return format_html(f'<img width=100 src={image_url}/>')
 
 
-class CatalogImageInline(admin.TabularInline):
-    model = Catalog.images.through
-    extra = 1
-    readonly_fields = ('preview', )
-
-    def preview(self, obj):
-        return format_html(f'<img src="{obj.image.image.url}" height=100 />')
-
-
-class CatalogVideoInline(admin.TabularInline):
-    model = Catalog.videos.through
-    extra = 1
-    readonly_fields = ('preview', )
-
-    def preview(self, obj):
-        return format_html(f'<video width="320" height= "240" controls><source src="{obj.video.video.url}" type="video/mp4"></video>')
-
-
 @admin.register(Catalog)
 class CatalogAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'vendor', 'status', 'created_at', 'product_count', 'catalog_actions')
     list_filter = ('status', )
-    inlines = (CatalogImageInline, CatalogVideoInline)
+    # inlines = (CatalogImageInline, CatalogVideoInline)
 
     def product_count(self, obj):
         return f'{obj.products.all().count()} product(s)'
