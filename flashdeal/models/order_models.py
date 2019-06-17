@@ -9,7 +9,7 @@ from flashdeal.contances import STATE_LIST
 
 class Basket(BaseModel):
 
-    products = models.ManyToManyField('flashdeal.Product')
+    product_variants = models.ManyToManyField('flashdeal.ProductVariant')
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='basket',
                              related_query_name='basket', primary_key=True)
 
@@ -40,7 +40,8 @@ class Order(BaseModel):
         (TYPE_HOME_OFFICE, 'office'),
     )
 
-    products = models.ManyToManyField('flashdeal.Product', blank=False)
+    product_variant = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
+
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
 
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)

@@ -14,8 +14,9 @@ class OrderSerializer(serializers.ModelSerializer):
     products = ProductsSerializer(many=True, read_only=True)
 
     def validate(self, data):
-        self.basket = self.context['request'].user.basket
-        if self.basket.products.count() == 0:
+        basket, _ = Basket.objects.get_or_create(user=self.context['request'].user)
+        self.basket = basket
+        if basket.products.count() == 0:
             raise serializers.ValidationError("Basket is empty")
         return data
 

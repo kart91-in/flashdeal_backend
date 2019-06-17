@@ -7,17 +7,21 @@ from rest_framework import status
 
 from flashdeal.fixtures import gen_products
 from flashdeal.models import Basket
+from flashdeal.models.product_models import ProductVariant
 from flashdeal.test.base_request_test import BaseTest
 
 
 class OrderTest(BaseTest):
 
+    fixtures = ['colors.json', 'sizes.json']
+
     def setUp(self):
         super().setUp()
         self.login_user()
         self.products = gen_products(3)
+        self.buy_product = ProductVariant.objects.all()[:2]
         Basket.objects.create(user=self.user)
-        self.user.basket.products.add(*self.products)
+        self.user.basket.product_variant.set(self.buy_product)
         self.order_data = {
             'name': self.f.name(),
             'address': self.f.address(),

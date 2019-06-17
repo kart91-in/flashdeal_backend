@@ -52,7 +52,9 @@ class ProductVariant(BaseModel):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if not self.upper_price:
-            self.upper_price = self.sale_price
+            self.upper_price = self.sale_price or self.product.upper_price
+        if not self.sale_price:
+            self.sale_price = self.product.sale_price
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 

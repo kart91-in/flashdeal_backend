@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
+from django.http import Http404
 from rest_framework import serializers
+from rest_framework.exceptions import NotAuthenticated
+
 from flashdeal.models.vendor_models import Vendor
 
 
@@ -29,5 +32,7 @@ class VendorSerializer(serializers.ModelSerializer):
             if not created:
                 user.set_password(password)
             self.validated_data['user_id'] = user.id
+        elif not self.context['request'].user:
+            raise NotAuthenticated('No user info found')
         return super().save(**kwargs)
 

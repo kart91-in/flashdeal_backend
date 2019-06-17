@@ -1,9 +1,10 @@
-from random import random, uniform
+from random import random, uniform, randint
 
 from django.contrib.auth.models import User
 from faker import Faker
 
 from flashdeal.models import Vendor, Product
+from flashdeal.models.product_models import ProductColor, ProductSize
 
 
 def gen_users(number=1, **kwargs):
@@ -42,12 +43,23 @@ def gen_product_for_vendors(vendor_id=None, number=1, **kwargs):
     fa = Faker()
     if not vendor_id:
         vendor_id = gen_vendors(1)[0].id
-    return [Product.objects.create(
-        vendor_id=vendor_id,
-        name=fa.sentences()[0],
-        upper_price=100.59,
-        sale_price=uniform(10.5, 100.5)
-    ) for i in range(number)]
+    colors = ProductColor.objects.all()[:number+1]
+    sizes = ProductSize.objects.all()[:number+1]
+    products = []
+    for i in range(number):
+        product = Product.objects.create(
+            vendor_id=vendor_id,
+            name=fa.sentences()[0],
+            upper_price=100.59,
+            sale_price=uniform(10.5, 100.5)
+        )
+        product.variants.create(
+            color=colors[i],
+            size=sizes[i],
+            stock=randint(3, 10)
+        )
+        products.append(product)
+    return products
 
 
 def gen_products(product_count, vendor_count=1):

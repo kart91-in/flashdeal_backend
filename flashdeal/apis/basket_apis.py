@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from flashdeal.models import Basket, Product
+from flashdeal.models.product_models import ProductVariant
 from flashdeal.serializers.basket_serializers import BasketSerializer
 
 
@@ -22,10 +23,10 @@ class BasketRetrieveUpdateDeleteAPI(mixins.DestroyModelMixin, RetrieveUpdateAPIV
         if self.remove_product:
             # Remove product from basket
             obj = self.get_object()
-            product_id = request.data.get('product_id')
-            product_remove = Product.objects.filter(pk=product_id).first()
-            if not product_remove:
+            variant_id = request.data.get('variant_id')
+            variant_remove = ProductVariant.objects.filter(pk=variant_id).first()
+            if not variant_remove:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            obj.products.remove(product_remove)
+            obj.product_variants.remove(variant_remove)
             return Response(self.get_serializer(obj).data)
         return self.update(request, *args, **kwargs)

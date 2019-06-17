@@ -1,22 +1,25 @@
 from rest_framework import serializers
 from flashdeal.models import Basket, Product
-from flashdeal.serializers.product_serializers import ProductsSerializer
+from flashdeal.models.product_models import ProductVariant
+from flashdeal.serializers.product_serializers import ProductsVariantSerializer
 
 
 class BasketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Basket
-        fields = ('user_id', 'product_id', 'products')
+        fields = ('user_id', 'variant_id', 'product_variants')
+        extra_kwargs = {
+            'user_id': {'default': serializers.CurrentUserDefault(), 'source': 'user'},
+        }
 
-    user_id = serializers.CharField(read_only=True)
-    products = ProductsSerializer(many=True, read_only=True)
+    product_variants = ProductsVariantSerializer(many=True, read_only=True)
 
-    product_id = serializers.PrimaryKeyRelatedField(
-        write_only=True, queryset=Product.objects, required=True)
+    variant_id = serializers.PrimaryKeyRelatedField(
+        write_only=True, queryset=ProductVariant.objects, required=True)
 
     def update(self, instance, validated_data):
         model = super().update(instance, validated_data)
-        product = validated_data.get('product_id')
-        model.products.add(product)
+        variant = validated_data.get('variant_id')
+        model.product_variants.add(variant)
         return model
 
