@@ -14,7 +14,7 @@ from flashdeal.test.base_request_test import BaseTest
 
 class OrderTest(BaseTest):
 
-    fixtures = ['colors.json', 'sizes.json']
+    fixtures = ['colors.json', 'sizes.json', 'awb.json']
 
     def setUp(self):
         super().setUp()
@@ -26,13 +26,12 @@ class OrderTest(BaseTest):
         self.order_data = {
             'customer_name': self.f.name(),
             'customer_address': self.f.address(),
-            'customer_phone': self.f.phone_number(),
-            'alternate_customer_contact': self.f.phone_number(),
+            'customer_phone': self.f.random_number(10, True),
+            'alternate_customer_contact': self.f.random_number(10, True),
             'address_type': 'home',
-            'city': self.f.city(),
             'c_city': self.f.city(),
             'c_state': 'bihar',
-            'pin_code': self.f.random_number(6, True),
+            'pin_code': 110003,
         }
         self.payment_data = {
             'transaction_id': self.f.random_number(6, True),
@@ -82,16 +81,17 @@ class OrderTest(BaseTest):
         delivery_info = {
             'actual_weight': 10,
             'volumetric_weight': 10,
-            'pincode': self.f.random_number(6, True),
+            'pincode': 110005,
             'pickup_address': self.f.address(),
-            'pickup_address_pincode': self.f.random_number(6, True),
+            'pickup_address_pincode': 110026,
             'rto_name': self.f.name(),
             'rto_state': 'bihar',
-            'rto_contact_no': self.f.phone_number(),
+            'rto_contact_no': self.f.random_number(10, True),
             'rto_address': self.f.address(),
-            'rto_pincode': self.f.random_number(6, True),
+            'rto_pincode': 110003,
         }
         order_id = resp.json()['order_id']
         order = Order.objects.get(id=order_id)
-        DeliveryInfo.objects.create(order=order, **delivery_info)
+        delivery_info = DeliveryInfo.objects.create(order=order, **delivery_info)
         self.assertEqual(order.status, Order.STATUS_VERIFIED)
+        delivery_info.send_to_delivery()

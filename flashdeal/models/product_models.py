@@ -64,6 +64,41 @@ class ProductVariant(BaseModel):
             self.sale_price = self.product.sale_price
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
+    def skus_attributes(self):
+        product = self.product
+        vendor = self.product.vendor
+        tax = float(self.sale_price) * 0.12
+        return {
+            'product_name': product.name,
+            'client_sku_id': self.id,
+            'price': float(self.sale_price),
+            'product_category': product.product_category,
+            'product_subcategory': product.product_subcategory,
+            'brand_name': product.brand_name,
+            'volumetric_weight': product.volumetric_weight,
+            'box_type': 'box_type',
+            'invoice_no': 'ADSf',
+            'product_sale_value': float(self.upper_price),
+            'hsn_code': product.hsn_code,
+            'additional_details': {
+                'color': self.color.name,
+                'size': self.size.name,
+            },
+            'seller_details': {
+                'seller_name': vendor.name,
+                'seller_address': vendor.address,
+                'seller_state': vendor.state,
+                'gstin_number': vendor.gstin_number,
+            },
+            'taxes': {
+                "cgst": tax/2.,
+                "sgst": tax/2.,
+                "igst": 0,
+                "total_tax": tax
+            }
+
+        }
+
 
 class ProductSize(BaseModel):
 

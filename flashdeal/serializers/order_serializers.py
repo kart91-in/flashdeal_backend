@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from flashdeal.models import Order, Basket
-from flashdeal.serializers.product_serializers import ProductsSerializer, ProductsVariantSerializer
+from flashdeal.serializers.product_serializers import ProductsVariantSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'status', 'total_price',
 
                   'customer_name', 'customer_phone', 'customer_address', 'address_type',
-                  'city', 'pin_code', 'c_city', 'c_state', 'alternate_customer_contact',
+                  'pin_code', 'c_city', 'c_state', 'alternate_customer_contact',
 
                   'product_variants',
                   )
