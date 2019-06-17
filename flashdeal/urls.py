@@ -42,6 +42,8 @@ urlpatterns = [
 
     path('api/basket/products/add/', BasketRetrieveUpdateDeleteAPI.as_view(),
          name='add_basket_product'),
+    path('api/basket/', BasketRetrieveUpdateDeleteAPI.as_view(),
+         name='basket_product'),
     path('api/basket/products/remove/', BasketRetrieveUpdateDeleteAPI.as_view(remove_product=True),
          name='remove_basket_product'),
 

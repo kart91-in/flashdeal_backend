@@ -5,7 +5,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse, path
 from django.utils.html import format_html
 from flashdeal.forms import AddLogNoteForm
-from flashdeal.models import Product, Image, Catalog, Video, FlashDeal
+from flashdeal.models import Product, Image, Catalog, Video, FlashDeal, Order
+from flashdeal.models.order_models import DeliveryInfo
 from flashdeal.models.vendor_models import Vendor, VendorApprovalLog
 
 
@@ -95,6 +96,23 @@ class ProductAdmin(admin.ModelAdmin):
         image_url = obj.image_url()
         if not image_url: return '---'
         return format_html(f'<img width=100 src={image_url}/>')
+
+
+@admin.register(DeliveryInfo)
+class DeliveryAdmin(admin.ModelAdmin):
+
+    list_display = ('order', 'awb_number', 'created_at', )
+    list_filter = ('status', )
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('user', 'delivery_info', 'status', 'customer_name', 'created_at', 'order_actions')
+    list_filter = ('status', )
+
+    def order_actions(self, obj):
+        create_delivery = reverse('admin:flashdeal_delivery_add') + f'?order={obj.pk}'
+        return format_html(f'<a target="_blank" class="button" href="{create_delivery}">Deliver</a>')
 
 
 @admin.register(Catalog)
