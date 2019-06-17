@@ -32,20 +32,18 @@ class Order(BaseModel):
         (STATUS_CANCELED, 'Canceled'),
     )
 
-    TYPE_HOME_ADDRESS = 0
-    TYPE_HOME_OFFICE = 1
+    TYPE_HOME_ADDRESS = 'home'
+    TYPE_HOME_OFFICE = 'office'
 
     CUSTOMER_ADDRESS_TYPE = (
         (TYPE_HOME_ADDRESS, 'home'),
         (TYPE_HOME_OFFICE, 'office'),
     )
 
-    product_variant = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
-
+    product_variants = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
-
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
-    tracking = models.OneToOneField('flashdeal.Tracking', on_delete=models.PROTECT, null=True, blank=True)
+    delivery_info = models.OneToOneField('flashdeal.DeliveryInfo', null=True, blank=True, on_delete=models.PROTECT)
 
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
@@ -54,13 +52,10 @@ class Order(BaseModel):
     customer_address = models.CharField(max_length=500)
     address_type = models.CharField(max_length=500, default=TYPE_HOME_ADDRESS, choices=CUSTOMER_ADDRESS_TYPE)
     city = models.CharField(max_length=500)
-    pin_code = models.CharField(max_length=500)
+    pin_code = models.CharField(max_length=6)
     c_city = models.CharField(max_length=500)
     c_state = models.CharField(max_length=500, choices=STATE_LIST)
     alternate_customer_contact = models.CharField(max_length=500, blank=True, null=True)
-
-    delivery_info = models.OneToOneField('flashdeal.DeliveryInfo', null=True, blank=True, on_delete=models.PROTECT)
-
 
     def __str__(self):
         return 'Order %s: %s' % (self.id, self.customer_name)
@@ -71,7 +66,7 @@ class Order(BaseModel):
 
     @property
     def total_price(self):
-        return self.products.all().aggregate(total=Sum('sale_price'))['total']
+        return self.product_variants.all().aggregate(total=Sum('sale_price'))['total']
 
     def add_payment(self, payment):
         if self.payment:
@@ -98,6 +93,11 @@ class DeliveryInfo(BaseModel):
     rto_contact_no = models.CharField(max_length=500, blank=True, null=True)
     rto_address = models.CharField(max_length=500, blank=True, null=True)
     rto_pincode = models.PositiveIntegerField(default=0)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        self.order.status = Order.STATUS_VERIFIED
+        self.order.save()
 
 
 class Tracking(BaseModel):

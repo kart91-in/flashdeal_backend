@@ -1,29 +1,36 @@
 from rest_framework import serializers
 from flashdeal.models import Order, Basket
-from flashdeal.serializers.product_serializers import ProductsSerializer
+from flashdeal.serializers.product_serializers import ProductsSerializer, ProductsVariantSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ('id', 'user_id', 'products', 'name', 'address', 'phone',
-                  'city', 'pin_code', 'alternate_contact', 'status',
-                  'total_price')
+        fields = ('id', 'user', 'status', 'total_price',
+
+                  'customer_name', 'customer_phone', 'customer_address', 'address_type',
+                  'city', 'pin_code', 'c_city', 'c_state', 'alternate_customer_contact',
+
+                  'product_variants',
+                  )
+        extra_kwargs = {
+            'user': {'read_only': True}
+        }
 
     status = serializers.CharField(read_only=True, source='status_text')
-    products = ProductsSerializer(many=True, read_only=True)
+    product_variants = ProductsVariantSerializer(many=True, read_only=True)
 
     def validate(self, data):
         basket, _ = Basket.objects.get_or_create(user=self.context['request'].user)
         self.basket = basket
-        if basket.products.count() == 0:
+        if basket.product_variants.count() == 0:
             raise serializers.ValidationError("Basket is empty")
         return data
 
     def create(self, validated_data):
         validated_data = {
             'user': self.basket.user,
-            'products': self.basket.products.all(),
+            'product_variants': self.basket.product_variants.all(),
             **validated_data,
         }
         return super().create(validated_data)

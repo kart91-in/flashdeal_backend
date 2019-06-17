@@ -33,7 +33,6 @@ class ProductsVariantSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'upper_price': {'required': False},
             'stock': {'required': False, },
-            'product': {'write_only': True, }
         }
 
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects)

@@ -27,6 +27,11 @@ class ProductTest(BaseTest):
             'description': self.f.text(),
             'sale_price': randrange(10, 20),
             'upper_price': randrange(20, 30),
+            'product_category': self.f.job(),
+            'product_subcategory': self.f.job(),
+            'brand_name': self.f.job(),
+            'hsn_code': '124422',
+            'volumetric_weight': randrange(20, 30),
             'image_files': [
                 self._create_image(),
                 self._create_image(),
@@ -54,7 +59,6 @@ class ProductTest(BaseTest):
 
     def test_create_product(self):
         url = reverse('flashdeal:product')
-        print(self.data)
         resp = self.client.post(url, data=self.data, format='multipart')
         data = resp.json()
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)

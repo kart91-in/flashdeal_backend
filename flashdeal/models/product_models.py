@@ -20,6 +20,13 @@ class Product(BaseModel):
     colors = models.ManyToManyField('ProductColor', blank=True, related_name='products',
                                     related_query_name='product', through='ProductVariant')
 
+    product_category = models.CharField(max_length=500)
+    product_subcategory = models.CharField(max_length=500)
+    brand_name = models.CharField(max_length=500)
+    box_type = models.CharField(max_length=500, default='box')
+    hsn_code = models.CharField(max_length=500)
+    volumetric_weight = models.PositiveIntegerField(default=0)
+
     def sale_percent(self):
         upper_price = self.get_upper_price()
         return (upper_price - self.sale_price) * Decimal(100.0) / upper_price
