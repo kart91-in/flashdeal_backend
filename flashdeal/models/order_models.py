@@ -45,7 +45,6 @@ class Order(BaseModel):
     product_variants = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
-    delivery_info = models.OneToOneField('flashdeal.DeliveryInfo', null=True, blank=True, on_delete=models.PROTECT)
 
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
@@ -134,7 +133,9 @@ class DeliveryInfo(BaseModel):
         (STATUS_SENT_FAILED, 'failed'),
     )
 
-    awb_number = models.CharField(max_length=500, null=True, blank=True)
+    order = models.OneToOneField('flashdeal.Order', on_delete=models.PROTECT, related_name='delivery_info',)
+
+    awb_number = models.CharField(max_length=500, null=True, blank=True, help_text='Will get one form AWB number data if not specific')
 
     actual_weight = models.PositiveIntegerField(default=0)
     volumetric_weight = models.PositiveIntegerField(default=0)
@@ -155,16 +156,25 @@ class DeliveryInfo(BaseModel):
     meta = JSONField(default=dict)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.pk:
+            super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+            return
+
         awb_number = AWBNumber.objects.filter(is_used=False).order_by().first()
-        if not awb_number:
+        if not awb_number and not self.awb_number:
             self.status = DeliveryInfo.STATUS_NOT_SEND
             super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
             return
-        self.awb_number = awb_number.value
+
+        self.awb_number = self.awb_number or awb_number.value
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+
         self.order.delivery_info = self
         self.order.status = Order.STATUS_VERIFIED
         self.order.save()
+        awb_number.is_used = True
+        awb_number.save()
+        self.send_to_delivery()
 
     def send_to_delivery(self):
         resp = send_forward_request(self.order.gen_delivery_request_params())

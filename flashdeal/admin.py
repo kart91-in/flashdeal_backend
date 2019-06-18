@@ -101,8 +101,36 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(DeliveryInfo)
 class DeliveryAdmin(admin.ModelAdmin):
 
-    list_display = ('order', 'awb_number', 'created_at', )
+    list_display = ('order', 'awb_number', 'created_at', 'delivery_actions')
     list_filter = ('status', )
+    readonly_fields = ('status', 'meta', )
+
+    def delivery_actions(self, obj):
+        if obj.status == DeliveryInfo.STATUS_SENT_SUCCESS:
+            return None
+        send_delivery = reverse('admin:send-delivery', args=[obj.pk])
+        return format_html(f'<a class="button" href="{send_delivery}">Sent for pickup</a>')
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                '<path:object_id>/send/',
+                self.admin_site.admin_view(self.send_delivery),
+                name='send-delivery',
+            ),
+        ]
+        return custom_urls + urls
+
+    def send_delivery(self, request, object_id, *args, **kwargs):
+        try:
+            info = self.get_object(request, object_id)
+            info.send_to_delivery()
+            self.message_user(request, 'Sent to Shadow fax', messages.SUCCESS)
+        except ValidationError as e:
+            self.message_user(request, e.message, messages.ERROR)
+
+        return redirect(reverse('admin:flashdeal_deliveryinfo_changelist'))
 
 
 @admin.register(AWBNumber)
@@ -110,6 +138,7 @@ class AWBNumberAdmin(admin.ModelAdmin):
     list_display = ('value', 'is_used', )
     list_filter = ('is_used', )
     ordering = ('is_used', )
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
