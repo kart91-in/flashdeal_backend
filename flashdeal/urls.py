@@ -8,7 +8,7 @@ from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI
 from flashdeal.apis.payment_apis import PaymentRetrieveCreateDeleteAPI
 from flashdeal.apis.product_apis import ProductListCreateAPI, \
     ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
-from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI
+from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI, UserResendOtpAPI
 from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI
 from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
 from flashdeal.views.flashdeal_views import FlashDealCreateView, FlashDealListView
@@ -53,6 +53,7 @@ urlpatterns = [
     path('api/token/create/', obtain_jwt_token, name='token_create'),
     path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),
     path('api/token/', UserTokenAPI.as_view(), name='token_create'),
+    path('api/token/resend_otp/', UserResendOtpAPI.as_view(), name='token_otp_resend'),
 
     path('api/user/register/', UserRegisterAPI.as_view(), name='user_register'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))

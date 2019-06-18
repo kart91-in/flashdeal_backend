@@ -12,7 +12,6 @@ def send_otp_message(to_phone_number):
         'mobile': to_phone_number
     }).json()
 
-
 def resend_otp_message(to_phone_number):
     return requests.post('https://control.msg91.com/api/retryotp.php', data={
         **default_params,
