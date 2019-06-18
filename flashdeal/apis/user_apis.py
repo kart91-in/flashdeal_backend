@@ -21,7 +21,7 @@ class UserRegisterAPI(CreateAPIView):
         super().post(request, *args, **kwargs)
         send_otp_result = send_otp_message(request.data.get('phone'))
         if send_otp_result.get('type') != 'success':
-            transaction.rollback()
+            transaction.set_rollback(True)
             return Response(send_otp_result, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_201_CREATED)
 
