@@ -117,7 +117,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ('status', )
 
     def order_actions(self, obj):
-        create_delivery = reverse('admin:flashdeal_delivery_add') + f'?order={obj.pk}'
+        create_delivery = reverse('admin:flashdeal_deliveryinfo_add') + f'?order={obj.pk}'
         return format_html(f'<a target="_blank" class="button" href="{create_delivery}">Deliver</a>')
 
 
