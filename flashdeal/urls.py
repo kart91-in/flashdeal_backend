@@ -4,8 +4,9 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
 from flashdeal.apis.catalog_apis import CatalogListCreateAPI, CatalogDestroyUpdateAPI
-from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI
-from flashdeal.apis.payment_apis import PaymentRetrieveCreateDeleteAPI
+from flashdeal.apis.flashdeal_apis import FlashDealListCreateAPI, FlashDealRetrieveUpdateDestroyAPIView
+from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI, OrderListCreateAPI
+from flashdeal.apis.payment_apis import PaymentListCreateAPI, PaymentRetrieveAPI
 from flashdeal.apis.product_apis import ProductListCreateAPI, \
     ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
 from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI, UserResendOtpAPI
@@ -50,8 +51,14 @@ urlpatterns = [
     path('api/basket/products/remove/', BasketRetrieveUpdateDeleteAPI.as_view(remove_product=True),
          name='remove_basket_product'),
 
-    path('api/order/', OrderRetrieveUpdateDeleteAPI.as_view(), name='order'),
-    path('api/payment/', PaymentRetrieveCreateDeleteAPI.as_view(), name='payment'),
+    path('api/order/', OrderListCreateAPI.as_view(), name='order'),
+    path('api/order/<int:pk>/', OrderRetrieveUpdateDeleteAPI.as_view(), name='order_detail'),
+
+    path('api/flashdeal/', FlashDealListCreateAPI.as_view(), name='flashdeal_list'),
+    path('api/flashdeal/<int:pk>/', FlashDealRetrieveUpdateDestroyAPIView.as_view(), name='flashdeal'),
+
+    path('api/payment/', PaymentListCreateAPI.as_view(), name='payment_list'),
+    path('api/payment/<int:pk>/', PaymentRetrieveAPI.as_view(), name='payment'),
 
     path('api/token/create/', obtain_jwt_token, name='token_create'),
     path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),
