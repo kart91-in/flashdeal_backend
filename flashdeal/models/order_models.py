@@ -1,4 +1,3 @@
-from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
@@ -45,6 +44,7 @@ class Order(BaseModel):
     product_variants = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
+    return_order = models.OneToOneField('flashdeal.ReturnOrder', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
 
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
@@ -56,7 +56,6 @@ class Order(BaseModel):
     c_city = models.CharField(max_length=500)
     c_state = models.CharField(max_length=500, choices=STATE_LIST)
     alternate_customer_contact = models.CharField(max_length=500, blank=True, null=True)
-
 
     def __str__(self):
         return 'Order %s: %s' % (self.id, self.customer_name)
@@ -209,3 +208,19 @@ class Payment(BaseModel):
     gateway = models.CharField(max_length=500)
     amount = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     meta = JSONField(default=dict)
+
+
+class ReturnOrder(BaseModel):
+
+    warehouse_name = models.CharField(max_length=500)
+    warehouse_address = models.CharField(max_length=500)
+    destination_pincode = models.CharField(max_length=500)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Total amount (inclusive GST) of the AWB')
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text='Price (exclusive of GST) of the order')
+
+    address_line = models.CharField(max_length=500)
+    city = models.CharField(max_length=500)
+    country = models.CharField(max_length=500)
+    pincode = models.CharField(max_length=500)
+    phone_number = models.CharField(max_length=500)
+    sms_contact = models.CharField(max_length=500)

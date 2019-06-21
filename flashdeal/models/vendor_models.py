@@ -27,6 +27,7 @@ class Vendor(BaseModel):
     state = models.CharField(max_length=500, choices=STATE_LIST)
     phone = models.CharField(max_length=500, blank=True, null=True)
     status = models.PositiveSmallIntegerField(default=STATUS_NOT_VERIFIED, choices=STATUS)
+    images = models.ManyToManyField('flashdeal.Image', related_name='vendors', related_query_name='vendor')
 
     def approve(self, by_user):
         if self.status != self.STATUS_NOT_VERIFIED:

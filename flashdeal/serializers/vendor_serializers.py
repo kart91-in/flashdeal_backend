@@ -4,18 +4,20 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotAuthenticated
 
 from flashdeal.models.vendor_models import Vendor
+from flashdeal.serializers.product_serializers import ImagesSerializer
 
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
-        fields = ('user_id', 'name', 'email', 'gstin_number', 'address',
+        fields = ('pk', 'user_id', 'name', 'email', 'gstin_number', 'address',
                   'phone', 'status', 'state', 'status',
-                  'username', 'password')
+                  'username', 'password', 'images')
         extra_kwargs = {
             'user_id': {'default': serializers.CurrentUserDefault(), 'source': 'user'},
         }
 
+    images = ImagesSerializer(many=True, read_only=True,)
     status = serializers.SerializerMethodField(read_only=True, )
     password = serializers.CharField(write_only=True, required=False)
     username = serializers.CharField(write_only=True, required=False)

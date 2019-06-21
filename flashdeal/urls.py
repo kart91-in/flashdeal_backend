@@ -3,13 +3,13 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
-from flashdeal.apis.catalog_apis import CatalogListCreateAPI
+from flashdeal.apis.catalog_apis import CatalogListCreateAPI, CatalogDestroyUpdateAPI
 from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI
 from flashdeal.apis.payment_apis import PaymentRetrieveCreateDeleteAPI
 from flashdeal.apis.product_apis import ProductListCreateAPI, \
     ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
 from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI, UserResendOtpAPI
-from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI
+from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI, ApproveVendorAPI, RejectVendorAPI, VendorListCreateAPI
 from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
 from flashdeal.views.flashdeal_views import FlashDealCreateView, FlashDealListView
 from flashdeal.views.product_views import ProductListView, ProductDetailView, ProductCreateView
@@ -30,6 +30,7 @@ urlpatterns = [
     path('catalogs/<int:pk>/submit/', CatalogSubmitView.as_view(), name='catalog_submit'),
 
     path('api/catalogs/', CatalogListCreateAPI.as_view(), name='catalog'),
+    path('api/catalogs/<int:pk>/', CatalogDestroyUpdateAPI.as_view(), name='catalog_object'),
 
     path('api/product/size/', ProductSizeListAPI.as_view(), name='product_size'),
     path('api/product/color/', ProductColorListAPI.as_view(), name='product_color'),
@@ -37,8 +38,10 @@ urlpatterns = [
     path('api/product/', ProductListCreateAPI.as_view(), name='product'),
     path('api/product/<int:pk>/', ProductDestroyUpdateAPI.as_view(), name='product_object'),
 
-    path('api/vendor/', VendorRetrieveUpdateCreateAPI.as_view(), name='post_vendor'),
+    path('api/vendor/', VendorListCreateAPI.as_view(), name='post_vendor'),
     path('api/vendor/<int:pk>/', VendorRetrieveUpdateCreateAPI.as_view(), name='get_vendor'),
+    path('api/vendor/<int:pk>/approve/', ApproveVendorAPI.as_view(), name='approve_vendor'),
+    path('api/vendor/<int:pk>/reject/', RejectVendorAPI.as_view(), name='reject_vendor'),
 
     path('api/basket/products/add/', BasketRetrieveUpdateDeleteAPI.as_view(),
          name='add_basket_product'),
