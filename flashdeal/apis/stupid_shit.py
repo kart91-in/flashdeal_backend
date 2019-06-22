@@ -8,10 +8,18 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 save_path = settings.MEDIA_ROOT + 'charts'
 if not os.path.isdir(save_path):
     os.mkdir(save_path, 0o755)
+
+class ContactAPI(APIView):
+    permission_classes = (AllowAny, )
+
+    def get(self, request, *args, **kwargs):
+        return Response({'info': 'Email - info@kart91.in;  Phone No - 9780-96-9780'}, status=status.HTTP_200_OK)
+
 
 class ChartFileListAPI(ListAPIView):
     permission_classes = (IsAuthenticated, )

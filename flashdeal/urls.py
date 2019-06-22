@@ -9,7 +9,7 @@ from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI, OrderListCre
 from flashdeal.apis.payment_apis import PaymentListCreateAPI, PaymentRetrieveAPI
 from flashdeal.apis.product_apis import ProductListCreateAPI, \
     ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
-from flashdeal.apis.stupid_shit import ChartFileListAPI
+from flashdeal.apis.stupid_shit import ChartFileListAPI, ContactAPI
 from flashdeal.apis.user_apis import UserRegisterAPI, UserTokenAPI, UserResendOtpAPI
 from flashdeal.apis.vendor_apis import VendorRetrieveUpdateCreateAPI, ApproveVendorAPI, RejectVendorAPI, VendorListCreateAPI
 from flashdeal.views.catalog_views import CatalogListView, CatalogCreateView, CatalogSubmitView
@@ -62,6 +62,7 @@ urlpatterns = [
     path('api/payment/<int:pk>/', PaymentRetrieveAPI.as_view(), name='payment'),
 
     path('api/chart/mcd/', ChartFileListAPI.as_view(), name='dump_fuck1'),
+    path('api/contact/', ContactAPI.as_view(), name='dump_fuck2'),
 
     path('api/token/create/', obtain_jwt_token, name='token_create'),
     path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),
