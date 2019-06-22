@@ -1,13 +1,27 @@
 import pandas as pd
 import numpy as np
 import random
-from datetime import datetime
-from PIL import Image
 from django.conf import settings
 import os
+
+from rest_framework import status
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+
 save_path = settings.MEDIA_ROOT + 'charts'
 if not os.path.isdir(save_path):
     os.mkdir(save_path, 0o755)
+
+class ChartFileListAPI(ListAPIView):
+    permission_classes = (IsAuthenticated, )
+
+    def get(self, request, *args, **kwargs):
+        charts = _url_list()
+        return Response({'charts': charts}, status=status.HTTP_200_OK)
+
+def _url_list():
+    return [f'{settings.MEDIA_URL}charts/{name}' for name in get_all_chart_files()]
 
 def get_all_chart_files():
     return os.listdir(save_path)
