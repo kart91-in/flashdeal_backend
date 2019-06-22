@@ -14,6 +14,7 @@ save_path = settings.MEDIA_ROOT + 'charts'
 if not os.path.isdir(save_path):
     os.mkdir(save_path, 0o755)
 
+
 class ContactAPI(APIView):
     permission_classes = (AllowAny, )
 

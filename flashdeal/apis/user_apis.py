@@ -27,6 +27,7 @@ class UserRegisterAPI(CreateAPIView):
 
 
 class UserResendOtpAPI(APIView):
+    permission_classes = (permissions.AllowAny, )
 
     def post(self, request, *args, **kwargs):
         resend_otp_result = resend_otp_message(request.data.get('phone'))
