@@ -18,7 +18,8 @@ class UserRegisterAPI(CreateAPIView):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
+        if not User.objects.filter(username=request.data.get('phone')).exists():
+            super().post(request, *args, **kwargs)
         send_otp_result = send_otp_message(request.data.get('phone'))
         if send_otp_result.get('type') != 'success':
             transaction.set_rollback(True)
