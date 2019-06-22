@@ -1,8 +1,4 @@
 import json
-from calendar import timegm
-from datetime import datetime, timedelta
-
-from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 
@@ -23,7 +19,9 @@ class OrderTest(BaseTest):
         self.products = gen_products(3)
         self.buy_product = ProductVariant.objects.all()[:2]
         Basket.objects.create(user=self.user)
-        self.user.basket.product_variants.set(self.buy_product)
+        self.user.basket.add_product_variant(self.buy_product[1])
+        self.user.basket.add_product_variant(self.buy_product[1])
+        self.user.basket.add_product_variant(self.buy_product[0])
         self.order_data = {
             'customer_name': self.f.name(),
             'customer_address': self.f.address(),
@@ -49,7 +47,9 @@ class OrderTest(BaseTest):
         resp = self.client.post(url, data=self.order_data)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(resp.json()['status'], 'Just created')
-        self.assertEqual(len(resp.json()['product_variants']), 2)
+        o = Order.objects.get(pk= resp.json()['id'])
+        print(o.gen_delivery_request_params())
+        self.assertEqual(len(resp.json()['purchases']), 2)
 
     def test_make_a_payment_to_an_order(self):
         # Make an order first

@@ -1,6 +1,14 @@
 from rest_framework import serializers
-from flashdeal.models import Order, Basket
+from flashdeal.models import Order, Basket, ProductVariantOrder
 from flashdeal.serializers.product_serializers import ProductsVariantSerializer
+
+
+class OrderPurchasesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVariantOrder
+        fields = ('id', 'product_variant', 'amount', 'order_id')
+
+    product_variant = ProductsVariantSerializer(read_only=True)
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -11,27 +19,32 @@ class OrderSerializer(serializers.ModelSerializer):
                   'customer_name', 'customer_phone', 'customer_address', 'address_type',
                   'pin_code', 'c_city', 'c_state', 'alternate_customer_contact',
 
-                  'product_variants',
+                  'purchases',
                   )
         extra_kwargs = {
             'user': {'read_only': True}
         }
 
     status = serializers.CharField(read_only=True, source='status_text')
-    product_variants = ProductsVariantSerializer(many=True, read_only=True)
+    purchases = OrderPurchasesSerializer(many=True, read_only=True)
 
     def validate(self, data):
         basket, _ = Basket.objects.get_or_create(user=self.context['request'].user)
         self.basket = basket
-        if basket.product_variants.count() == 0:
+        if basket.purchases.count() == 0:
             raise serializers.ValidationError("Basket is empty")
         return data
 
     def create(self, validated_data):
         validated_data = {
             'user': self.basket.user,
-            'product_variants': self.basket.product_variants.all(),
             **validated_data,
         }
-        return super().create(validated_data)
+        order = super().create(validated_data)
+        for purchase in self.basket.purchases.all():
+            order.purchases.create(
+                product_variant=purchase.product_variant,
+                amount=purchase.amount,
+            )
 
+        return order

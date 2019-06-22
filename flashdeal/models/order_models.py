@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q, F, ExpressionWrapper
 
 from core.models import BaseModel
 from flashdeal.contances import STATE_LIST
@@ -115,11 +115,19 @@ class Order(BaseModel):
 
     @property
     def total_price(self):
-        return self.purchases.all().aggregate(total=F('amount') * F('product_variant__sale_price'))['total']
+        return self.purchases.all().annotate(
+            total=ExpressionWrapper(
+                F('amount') * F('product_variant__sale_price')
+                , output_field=models.DecimalField())
+        ).aggregate(sum_total=Sum('total'))['sum_total']
 
     @property
     def declared_total_price(self):
-        return self.purchases.all().aggregate(total=F('amount') * F('product_variant__upper_price'))['total']
+        return self.purchases.all().annotate(
+            total=ExpressionWrapper(
+                F('amount') * F('product_variant__upper_price')
+            , output_field=models.DecimalField())
+        ).aggregate(sum_total=Sum('total'))['sum_total']
 
     def add_payment(self, payment):
         if self.payment:
@@ -222,7 +230,6 @@ class DeliveryInfo(BaseModel):
         self.order.save()
         awb_number.is_used = True
         awb_number.save()
-        self.send_to_delivery()
 
     def send_to_delivery(self):
         resp = send_forward_request(self.order.gen_delivery_request_params())
