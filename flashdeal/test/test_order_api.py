@@ -47,8 +47,6 @@ class OrderTest(BaseTest):
         resp = self.client.post(url, data=self.order_data)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(resp.json()['status'], 'Just created')
-        o = Order.objects.get(pk= resp.json()['id'])
-        print(o.gen_delivery_request_params())
         self.assertEqual(len(resp.json()['purchases']), 2)
 
     def test_make_a_payment_to_an_order(self):
@@ -57,7 +55,7 @@ class OrderTest(BaseTest):
         order_resp = self.client.post(url, data=self.order_data)
 
         # Do dummy Payment
-        url = reverse('flashdeal:payment')
+        url = reverse('flashdeal:payment_list')
         self.payment_data.update({
             'amount' : order_resp.json()['total_price'],
             'order' : order_resp.json()['id'],
@@ -72,7 +70,7 @@ class OrderTest(BaseTest):
         order_resp = self.client.post(url, data=self.order_data)
 
         # Do dummy Payment
-        url = reverse('flashdeal:payment')
+        url = reverse('flashdeal:payment_list')
         self.payment_data.update({
             'amount': order_resp.json()['total_price'],
             'order': order_resp.json()['id'],
@@ -95,4 +93,3 @@ class OrderTest(BaseTest):
         order = Order.objects.get(id=order_id)
         delivery_info = DeliveryInfo.objects.create(order=order, **delivery_info)
         self.assertEqual(order.status, Order.STATUS_VERIFIED)
-        delivery_info.send_to_delivery()
