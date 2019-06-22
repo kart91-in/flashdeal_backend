@@ -66,7 +66,8 @@ urlpatterns = [
     path('api/token/resend_otp/', UserResendOtpAPI.as_view(), name='token_otp_resend'),
 
     path('api/user/register/', UserRegisterAPI.as_view(), name='user_register'),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
