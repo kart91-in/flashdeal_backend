@@ -27,6 +27,6 @@ class BasketRetrieveUpdateDeleteAPI(mixins.DestroyModelMixin, RetrieveUpdateAPIV
             variant_remove = ProductVariant.objects.filter(pk=variant_id).first()
             if not variant_remove:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-            obj.product_variants.remove(variant_remove)
+            obj.remove_product_variant(variant_remove)
             return Response(self.get_serializer(obj).data)
         return self.update(request, *args, **kwargs)

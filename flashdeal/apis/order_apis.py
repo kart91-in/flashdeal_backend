@@ -21,3 +21,6 @@ class OrderListCreateAPI(ListCreateAPIView):
     serializer_class = OrderSerializer
     queryset = Order.objects
 
+
+# class OrderResendCreateAPI(ListCreateAPIView):
+

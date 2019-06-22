@@ -1,18 +1,67 @@
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models, transaction
-from django.db.models import Sum
+from django.db.models import Sum, Q, F
 
 from core.models import BaseModel
 from flashdeal.contances import STATE_LIST
 from flashdeal.delivery_service import send_forward_request
 
 
+class ProductVariantOrder(BaseModel):
+    product_variant = models.ForeignKey('flashdeal.ProductVariant', on_delete=models.CASCADE)
+    order = models.ForeignKey('flashdeal.Order', on_delete=models.CASCADE,
+                              related_name='purchases', related_query_name='purchase')
+    amount = models.PositiveIntegerField(default=1)
+
+
+    def skus_attributes(self):
+        attr = self.product_variant.skus_attributes()
+        tax = float(self.product_variant.sale_price) * 0.12
+        attr.update({
+            'taxes': {
+                "cgst": tax / 2.,
+                "sgst": tax / 2.,
+                "igst": 0,
+                "total_tax": tax
+            },
+            'additional_details': {
+                **attr['additional_details'],
+                'amount': self.amount
+            }
+        })
+        return attr
+
+
+
+class ProductVariantBasket(BaseModel):
+
+    product_variant = models.ForeignKey('flashdeal.ProductVariant', on_delete=models.CASCADE)
+    basket = models.ForeignKey('flashdeal.Basket', on_delete=models.CASCADE,
+                               related_name='purchases', related_query_name='purchase')
+    amount = models.PositiveIntegerField(default=1)
+
+
 class Basket(BaseModel):
 
-    product_variants = models.ManyToManyField('flashdeal.ProductVariant')
     user = models.OneToOneField(User, on_delete=models.PROTECT, related_name='basket',
                              related_query_name='basket', primary_key=True)
+    product_variants = models.ManyToManyField('flashdeal.ProductVariant', through=ProductVariantBasket)
+
+    def add_product_variant(self, product_variant):
+        purchase, new_create = self.purchases.get_or_create(product_variant=product_variant)
+        if not new_create:
+            purchase.amount += 1
+            purchase.save()
+
+    def remove_product_variant(self, product_variant):
+        purchase = self.purchases.filter(product_variant=product_variant).first()
+        if not purchase: return
+        if purchase.amount > 1:
+            purchase.amount -= 1
+            purchase.save()
+        else:
+            purchase.delete()
 
 
 class Order(BaseModel):
@@ -41,7 +90,7 @@ class Order(BaseModel):
         (TYPE_HOME_OFFICE, 'office'),
     )
 
-    product_variants = models.ManyToManyField('flashdeal.ProductVariant', blank=False)
+    product_variants = models.ManyToManyField('flashdeal.ProductVariant', through=ProductVariantOrder)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
     return_order = models.OneToOneField('flashdeal.ReturnOrder', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
@@ -66,11 +115,11 @@ class Order(BaseModel):
 
     @property
     def total_price(self):
-        return self.product_variants.all().aggregate(total=Sum('sale_price'))['total']
+        return self.purchases.all().aggregate(total=F('amount') * F('product_variant__sale_price'))['total']
 
     @property
     def declared_total_price(self):
-        return self.product_variants.all().aggregate(total=Sum('upper_price'))['total']
+        return self.purchases.all().aggregate(total=F('amount') * F('product_variant__upper_price'))['total']
 
     def add_payment(self, payment):
         if self.payment:
@@ -83,7 +132,7 @@ class Order(BaseModel):
         delivery_info = self.delivery_info
 
         total_price = float(self.total_price)
-        skus_attributes = [v.skus_attributes() for v in self.product_variants.all()]
+        skus_attributes = [v.skus_attributes() for v in self.purchases.all()]
         return {
             "customer_name": self.customer_name,
             "customer_phone": self.customer_phone,

@@ -20,16 +20,18 @@ class BasketTest(BaseTest):
 
     def test_add_a_product_to_basket(self):
 
-
         url = reverse('flashdeal:add_basket_product')
         resp = self.client.put(url, data={
             'variant_id': self.products[0].variants.first().id
         })
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertNotEqual(resp.json().get('product_variants'), [])
+        self.assertEqual(len(resp.json().get('purchases')), 1)
 
     def test_remove_a_product_to_basket(self):
         url = reverse('flashdeal:add_basket_product')
+        self.client.put(url, data={
+            'variant_id': self.products[0].variants.first().id
+        })
         self.client.put(url, data={
             'variant_id': self.products[0].variants.first().id
         })
@@ -39,6 +41,8 @@ class BasketTest(BaseTest):
         resp = self.client.put(url, data={
             'variant_id': self.products[0].variants.first().id
         })
+
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.json().get('product_variants'), [])
+        self.assertEqual(len(resp.json().get('purchases')), 1)
+
 

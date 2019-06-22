@@ -96,7 +96,6 @@ class ProductVariant(BaseModel):
                 "igst": 0,
                 "total_tax": tax
             }
-
         }
 
 
