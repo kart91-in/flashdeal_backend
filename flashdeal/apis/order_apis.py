@@ -7,7 +7,7 @@ from flashdeal.serializers.order_serializers import OrderSerializer
 
 class OrderRetrieveUpdateDeleteAPI(RetrieveUpdateAPIView):
 
-    permission_classes = (IsAdminUser, )
+    permission_classes = (IsAuthenticated, )
     serializer_class = OrderSerializer
     post_action = None
 
@@ -17,7 +17,7 @@ class OrderRetrieveUpdateDeleteAPI(RetrieveUpdateAPIView):
 
 class OrderListCreateAPI(ListCreateAPIView):
 
-    permission_classes = (IsAdminUser, )
+    permission_classes = (IsAuthenticated, )
     serializer_class = OrderSerializer
     queryset = Order.objects
 
