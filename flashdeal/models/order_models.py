@@ -254,8 +254,6 @@ class DeliveryInfo(BaseModel):
 
         self.awb_number = self.awb_number or awb_number.value
         super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
-
-        self.order.delivery_info = self
         self.order.status = Order.STATUS_VERIFIED
         self.order.save()
         awb_number.is_used = True

@@ -122,13 +122,12 @@ class OrderTest(BaseTest):
             'rto_address': self.f.address(),
             'rto_pincode': 110003,
         }
-        print(json.dumps(delivery_info))
         order_id = resp.json()['order_id']
-        order = Order.objects.get(id=order_id)
         resp = self.client.post(reverse('flashdeal:order_delivery_info', kwargs={'pk': order_id}),
                                 data=delivery_info, format='json')
+        order = Order.objects.get(id=order_id)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(order.status, Order.STATUS_PAYMENT)
+        self.assertEqual(order.status, Order.STATUS_VERIFIED)
 
         return_data = {
             'warehouse_name': self.f.company(),
