@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from flashdeal.models import Order, Basket, ProductVariantOrder
+from flashdeal.models.order_models import DeliveryInfo, ReturnOrder
 from flashdeal.serializers.product_serializers import ProductsVariantSerializer
 
 
@@ -48,3 +49,33 @@ class OrderSerializer(serializers.ModelSerializer):
             )
 
         return order
+
+
+class DeliveryInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = DeliveryInfo
+        fields = ('id', 'awb_number', 'actual_weight', 'volumetric_weight',
+                  'pincode', 'pickup_address', 'pickup_address_pincode', 'rto_name',
+                  'rto_city', 'rto_state', 'rto_contact_no', 'rto_address', 'rto_pincode',
+                  'meta', 'order'
+                  )
+        extra_kwargs = {
+            'meta': {'required': False},
+            'awb_number': {'required': False},
+        }
+
+
+class ReturnOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReturnOrder
+        fields = ('id', 'warehouse_name', 'warehouse_address', 'destination_pincode',
+                  'total_amount', 'price', 'address_line', 'city',
+                  'pincode', 'country', 'phone_number', 'sms_contact', 'reason',
+                  'order', 'order_id'
+                  )
+
+    order_id = serializers.IntegerField(write_only=True)
+    order = OrderSerializer(read_only=True)
+
+

@@ -27,7 +27,7 @@ class ProductVariantOrder(BaseModel):
             },
             'additional_details': {
                 **attr['additional_details'],
-                'amount': self.amount
+                'quantity': self.amount
             }
         })
         return attr
@@ -72,6 +72,7 @@ class Order(BaseModel):
     STATUS_SHIPPED = 3
     STATUS_DELIVERED = 4
     STATUS_CANCELED = 5
+    STATUS_RETURN = 6
 
     STATUS = (
         (STATUS_DRAFT, 'Just created'),
@@ -80,6 +81,7 @@ class Order(BaseModel):
         (STATUS_SHIPPED, 'Is Shipping'),
         (STATUS_DELIVERED, 'Delivered'),
         (STATUS_CANCELED, 'Canceled'),
+        (STATUS_RETURN, 'Return'),
     )
 
     TYPE_HOME_ADDRESS = 'home'
@@ -93,7 +95,6 @@ class Order(BaseModel):
     product_variants = models.ManyToManyField('flashdeal.ProductVariant', through=ProductVariantOrder)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='orders', related_query_name='order')
     payment = models.OneToOneField('flashdeal.Payment', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
-    return_order = models.OneToOneField('flashdeal.ReturnOrder', on_delete=models.PROTECT, related_name='order', null=True, blank=True)
 
     status = models.PositiveSmallIntegerField(default=STATUS[0][0], choices=STATUS)
 
@@ -137,6 +138,8 @@ class Order(BaseModel):
         self.save()
 
     def gen_delivery_request_params(self):
+        if not self.delivery_info:
+            return None
         delivery_info = self.delivery_info
 
         total_price = float(self.total_price)
@@ -154,6 +157,7 @@ class Order(BaseModel):
             "total_amount": total_price,
             "order_service": "NDD",
             "deliver_type": "Prepaid",
+            "qc_required": False,
             "cod_amount": 0,
             'client_order_id': self.id,
             'awb_number': delivery_info.awb_number,
@@ -268,6 +272,8 @@ class Payment(BaseModel):
 
 class ReturnOrder(BaseModel):
 
+    order = models.OneToOneField('flashdeal.Order', on_delete=models.PROTECT, related_name='return_order',)
+
     warehouse_name = models.CharField(max_length=500)
     warehouse_address = models.CharField(max_length=500)
     destination_pincode = models.CharField(max_length=500)
@@ -280,3 +286,10 @@ class ReturnOrder(BaseModel):
     pincode = models.CharField(max_length=500)
     phone_number = models.CharField(max_length=500)
     sms_contact = models.CharField(max_length=500)
+    reason = models.CharField(max_length=500)
+
+    def save(self, **kwargs):
+        obj = super().save(**kwargs)
+        self.order.status = Order.STATUS_RETURN
+        self.order.save()
+        return obj

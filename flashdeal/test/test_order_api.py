@@ -65,7 +65,7 @@ class OrderTest(BaseTest):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(order.status, Order.STATUS_PAYMENT)
 
-    def test_verify_a_order(self):
+    def test_verify_an_order(self):
         url = reverse('flashdeal:order')
         order_resp = self.client.post(url, data=self.order_data)
 
@@ -85,11 +85,67 @@ class OrderTest(BaseTest):
             'pickup_address_pincode': 110026,
             'rto_name': self.f.name(),
             'rto_state': 'bihar',
+            'rto_city': 'city 1',
             'rto_contact_no': self.f.random_number(10, True),
             'rto_address': self.f.address(),
             'rto_pincode': 110003,
         }
         order_id = resp.json()['order_id']
         order = Order.objects.get(id=order_id)
-        delivery_info = DeliveryInfo.objects.create(order=order, **delivery_info)
-        self.assertEqual(order.status, Order.STATUS_VERIFIED)
+        resp = self.client.post(reverse('flashdeal:order_delivery_info', kwargs={'pk': order_id}),
+                                data=delivery_info, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(order.status, Order.STATUS_PAYMENT)
+
+    def test_return_an_order(self):
+        url = reverse('flashdeal:order')
+        order_resp = self.client.post(url, data=self.order_data)
+
+        # Do dummy Payment
+        url = reverse('flashdeal:payment_list')
+        self.payment_data.update({
+            'amount': order_resp.json()['total_price'],
+            'order': order_resp.json()['id'],
+        })
+        resp = self.client.post(url, data=self.payment_data, format='json')
+
+        delivery_info = {
+            'actual_weight': 10,
+            'volumetric_weight': 10,
+            'pincode': 110005,
+            'pickup_address': self.f.address(),
+            'pickup_address_pincode': 110026,
+            'rto_name': self.f.name(),
+            'rto_state': 'bihar',
+            'rto_city': 'city 1',
+            'rto_contact_no': self.f.random_number(10, True),
+            'rto_address': self.f.address(),
+            'rto_pincode': 110003,
+        }
+        order_id = resp.json()['order_id']
+        order = Order.objects.get(id=order_id)
+        resp = self.client.post(reverse('flashdeal:order_delivery_info', kwargs={'pk': order_id}),
+                                data=delivery_info, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(order.status, Order.STATUS_PAYMENT)
+
+        return_data = {
+            'warehouse_name': self.f.company(),
+            'warehouse_address': self.f.address(),
+            'address_line': self.f.address(),
+            'city': self.f.city(),
+            'phone_number': self.f.phone_number(),
+            'sms_contact': self.f.phone_number(),
+            'reason': self.f.text(),
+            'country': 'India',
+            'destination_pincode': 110026,
+            'pincode': 110026,
+        }
+
+        resp = self.client.post(
+            reverse('flashdeal:order_return', kwargs={'pk': order_id}),
+            data=return_data, format='json')
+        print(resp.json())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+
