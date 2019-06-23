@@ -261,14 +261,15 @@ class DeliveryInfo(BaseModel):
 
     def send_to_delivery(self):
         resp = send_forward_request(self.order.gen_delivery_request_params())
-        if resp.get('message') != 'Success':
+        if not resp.ok or resp.json().get('message') != 'Success':
             self.status = DeliveryInfo.STATUS_SENT_FAILED
             if resp.get('message') == 'Invalid AWB Number. Existing order found with given awb number':
                 AWBNumber.objects.filter(value=self.awb_number).update(is_used=True)
         else:
             self.status = DeliveryInfo.STATUS_SENT_SUCCESS
-        self.meta = resp
+        self.meta = resp.json()
         self.save()
+        return resp
 
 
 class Tracking(BaseModel):

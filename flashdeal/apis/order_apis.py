@@ -36,6 +36,18 @@ class DeliveryInfoCreateAPI(CreateAPIView):
         return super().get_serializer(*args, data=kwargs['data'])
 
 
+class SendOrderToDeliveryAPI(APIView):
+
+    permission_classes = (IsAdminUser, )
+
+    def post(self, request, *args, **kwargs):
+        order = get_object_or_404(Order, pk=self.kwargs.get('pk'))
+        resp = order.delivery_info.send_to_delivery()
+        if resp.ok:
+            return Response(status=status.HTTP_200_OK)
+        return Response(resp.json(), status=resp.status_code)
+
+
 class OrderResendCreateAPI(ListCreateAPIView):
 
     permission_classes = (IsAuthenticated, )
@@ -55,7 +67,7 @@ class OrderResendCreateAPI(ListCreateAPIView):
 
 class ReturnOrderAPI(APIView):
 
-    permission_classes = (IsAuthenticated, )
+    permission_classes = (IsAdminUser, )
 
     def post(self, request, *args, **kwargs):
         return_request = get_object_or_404(ReturnOrder, pk=self.kwargs.get('pk'))

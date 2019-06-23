@@ -12,7 +12,7 @@ if not settings.DEBUG:
     token = settings.SHADOWFAX_TOKEN
 
 def send_forward_request(data):
-    return requests.post(url, json=data, headers={'Authorization': f'Token {token}'}).json()
+    return requests.post(url, json=data, headers={'Authorization': f'Token {token}'})
 
 
 def send_reverse_request(data):
