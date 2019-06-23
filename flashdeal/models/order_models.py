@@ -5,7 +5,7 @@ from django.db.models import Sum, Q, F, ExpressionWrapper
 
 from core.models import BaseModel
 from flashdeal.contances import STATE_LIST
-from flashdeal.delivery_service import send_forward_request
+from flashdeal.delivery_service import send_forward_request, send_reverse_request
 
 
 class ProductVariantOrder(BaseModel):
@@ -20,10 +20,10 @@ class ProductVariantOrder(BaseModel):
         tax = float(self.product_variant.sale_price) * 0.12
         attr.update({
             'taxes': {
-                "cgst": tax / 2.,
-                "sgst": tax / 2.,
-                "igst": 0,
-                "total_tax": tax
+                "cgst_amount": tax / 2.,
+                "sgst_amount": tax / 2.,
+                "igst_amount": 0,
+                "total_tax_amount": tax
             },
             'additional_details': {
                 **attr['additional_details'],
@@ -136,6 +136,33 @@ class Order(BaseModel):
         self.payment = payment
         self.status = self.STATUS_PAYMENT
         self.save()
+
+    def gen_return_request_params(self):
+        if not self.delivery_info or not self.return_order:
+            return None
+        delivery_info = self.delivery_info
+        return_order = self.return_order
+        skus_attributes = [v.skus_attributes() for v in self.purchases.all()]
+        return {
+            "client_order_number": self.pk,
+            "warehouse_name": return_order.warehouse_name,
+            "warehouse_address": return_order.warehouse_address,
+            "destination_pincode": return_order.destination_pincode,
+            "total_amount": return_order.total_amount,
+            "price": return_order.price,
+            "pickup_type": "regular",
+            "address_attributes": {
+                "address_line": return_order.address_line,
+                "city": return_order.city,
+                "country": return_order.country,
+                "pincode": return_order.pincode,
+                "name": return_order.name,
+                "phone_number": return_order.phone_number,
+                "sms_contact": return_order.sms_contact,
+            },
+            'skus_attributes': skus_attributes
+        }
+
 
     def gen_delivery_request_params(self):
         if not self.delivery_info:
@@ -271,6 +298,15 @@ class Payment(BaseModel):
 
 
 class ReturnOrder(BaseModel):
+    STATUS_NOT_SEND = 0
+    STATUS_SENT_SUCCESS = 1
+    STATUS_SENT_FAILED = 2
+
+    STATUS = (
+        (STATUS_NOT_SEND, 'not_send'),
+        (STATUS_SENT_SUCCESS, 'success'),
+        (STATUS_SENT_FAILED, 'failed'),
+    )
 
     order = models.OneToOneField('flashdeal.Order', on_delete=models.PROTECT, related_name='return_order',)
 
@@ -286,10 +322,19 @@ class ReturnOrder(BaseModel):
     pincode = models.CharField(max_length=500)
     phone_number = models.CharField(max_length=500)
     sms_contact = models.CharField(max_length=500)
-    reason = models.CharField(max_length=500)
+    name = models.CharField(max_length=500)
+
+    status = models.PositiveIntegerField(default=STATUS_NOT_SEND, choices=STATUS)
+
+    meta = JSONField(default=dict)
 
     def save(self, **kwargs):
         obj = super().save(**kwargs)
         self.order.status = Order.STATUS_RETURN
         self.order.save()
         return obj
+
+    def send_to_delivery(self):
+        resp = send_reverse_request(self.order.gen_return_request_params())
+        self.meta = resp
+        self.save()

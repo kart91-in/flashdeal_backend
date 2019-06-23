@@ -87,6 +87,16 @@ class VendorApprovalLogAdmin(admin.ModelAdmin):
         return obj.user
 
 
+@admin.register(Image)
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'image_url', 'created_at', )
+
+    def image_url(self, obj):
+        image_url = obj.image_url()
+        if not image_url: return '---'
+        return format_html(f'<img width=100 src={image_url}/>')
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
 

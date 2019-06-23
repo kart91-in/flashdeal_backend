@@ -1,5 +1,6 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, get_object_or_404, CreateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.views import APIView
 
 from flashdeal.models import Order, ReturnOrder
 from flashdeal.serializers.order_serializers import OrderSerializer, ReturnOrderSerializer, DeliveryInfoSerializer
@@ -47,4 +48,12 @@ class OrderResendCreateAPI(ListCreateAPIView):
             'price': obj.total_price,
         }
         return super().get_serializer(*args, **kwargs)
+
+
+class ReturnOrderAPI(APIView):
+
+    permission_classes = (IsAuthenticated, )
+
+    def post(self, request, *args, **kwargs):
+        return_request = get_object_or_404(ReturnOrder, pk=self.kwargs.get('pk'))
 

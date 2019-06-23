@@ -71,7 +71,7 @@ class ReturnOrderSerializer(serializers.ModelSerializer):
         model = ReturnOrder
         fields = ('id', 'warehouse_name', 'warehouse_address', 'destination_pincode',
                   'total_amount', 'price', 'address_line', 'city',
-                  'pincode', 'country', 'phone_number', 'sms_contact', 'reason',
+                  'pincode', 'country', 'phone_number', 'sms_contact', 'name',
                   'order', 'order_id'
                   )
 

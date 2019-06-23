@@ -85,9 +85,13 @@ class ProductVariant(BaseModel):
                 'size': self.size.name,
             },
             'seller_details': {
+                'regd_name': vendor.name,
+                'regd_address': vendor.address,
                 'seller_name': vendor.name,
                 'seller_address': vendor.address,
+                'state': vendor.state,
                 'seller_state': vendor.state,
+                'gstin': vendor.gstin_number,
                 'gstin_number': vendor.gstin_number,
             },
             'taxes': {

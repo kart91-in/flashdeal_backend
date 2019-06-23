@@ -145,7 +145,6 @@ class OrderTest(BaseTest):
         resp = self.client.post(
             reverse('flashdeal:order_return', kwargs={'pk': order_id}),
             data=return_data, format='json')
-        print(resp.json())
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
 
 
