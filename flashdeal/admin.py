@@ -92,7 +92,7 @@ class ImageAdmin(admin.ModelAdmin):
     list_display = ('name', 'image_url', 'created_at', )
 
     def image_url(self, obj):
-        image_url = obj.image_url()
+        image_url = obj.url()
         if not image_url: return '---'
         return format_html(f'<img width=100 src={image_url}/>')
 

@@ -7,7 +7,7 @@ video_dir_path = 'videos/%Y/%m/%d'
 
 class Image(BaseModel):
 
-    name = models.CharField(max_length=500)
+    name = models.CharField(max_length=500, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     image = models.ImageField(upload_to=image_dir_path)
 
@@ -23,7 +23,7 @@ class Image(BaseModel):
 
 class Video(BaseModel):
 
-    name = models.CharField(max_length=500)
+    name = models.CharField(max_length=500, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     video = models.FileField(upload_to=video_dir_path)
 
