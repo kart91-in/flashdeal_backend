@@ -122,6 +122,7 @@ class OrderTest(BaseTest):
             'rto_address': self.f.address(),
             'rto_pincode': 110003,
         }
+        print(json.dumps(delivery_info))
         order_id = resp.json()['order_id']
         order = Order.objects.get(id=order_id)
         resp = self.client.post(reverse('flashdeal:order_delivery_info', kwargs={'pk': order_id}),
