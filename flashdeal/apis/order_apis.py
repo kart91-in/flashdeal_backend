@@ -1,5 +1,8 @@
+from rest_framework import status
+from rest_framework.exceptions import ParseError
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, get_object_or_404, CreateAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from flashdeal.models import Order, ReturnOrder
@@ -56,4 +59,7 @@ class ReturnOrderAPI(APIView):
 
     def post(self, request, *args, **kwargs):
         return_request = get_object_or_404(ReturnOrder, pk=self.kwargs.get('pk'))
-
+        resp = return_request.send_to_delivery()
+        if resp.ok:
+            return Response(status=status.HTTP_200_OK)
+        return Response(resp.json(), status=resp.status_code)

@@ -4,7 +4,7 @@ from rest_framework import status
 
 from flashdeal.fixtures import gen_products
 from flashdeal.models import Basket, Order
-from flashdeal.models.order_models import DeliveryInfo
+from flashdeal.models.order_models import DeliveryInfo, ReturnOrder
 from flashdeal.models.product_models import ProductVariant
 from flashdeal.test.base_request_test import BaseTest
 
@@ -114,7 +114,7 @@ class OrderTest(BaseTest):
             'volumetric_weight': 10,
             'pincode': 110005,
             'pickup_address': self.f.address(),
-            'pickup_address_pincode': 110026,
+            'pickup_address_pincode': 400033,
             'rto_name': self.f.name(),
             'rto_state': 'bihar',
             'rto_city': 'city 1',
@@ -134,17 +134,21 @@ class OrderTest(BaseTest):
             'warehouse_address': self.f.address(),
             'address_line': self.f.address(),
             'city': self.f.city(),
-            'phone_number': self.f.phone_number(),
-            'sms_contact': self.f.phone_number(),
-            'reason': self.f.text(),
+            'phone_number': '91312858236',
+            'sms_contact': '91312858236',
+            'name': self.f.company(),
             'country': 'India',
-            'destination_pincode': 110026,
-            'pincode': 110026,
+            'destination_pincode': 400033,
+            'pincode': 400033,
         }
 
         resp = self.client.post(
             reverse('flashdeal:order_return', kwargs={'pk': order_id}),
             data=return_data, format='json')
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-
+        return_order_id = resp.json()['id']
+        resp = self.client.post(
+            reverse('flashdeal:order_return_send', kwargs={'pk': return_order_id}), format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(ReturnOrder.objects.get(pk=return_order_id).status, ReturnOrder.STATUS_NOT_SEND)
 

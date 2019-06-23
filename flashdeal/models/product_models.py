@@ -70,14 +70,18 @@ class ProductVariant(BaseModel):
         tax = float(self.sale_price) * 0.12
         return {
             'product_name': product.name,
+            'name': product.name,
             'client_sku_id': self.id,
             'price': float(self.sale_price),
             'product_category': product.product_category,
+            'category': product.product_category,
             'product_subcategory': product.product_subcategory,
             'brand_name': product.brand_name,
+            'brand': product.brand_name,
             'volumetric_weight': product.volumetric_weight,
             'box_type': 'box_type',
             'invoice_no': 'ADSf',
+            'invoice_id': 'ADSf',
             'product_sale_value': float(self.upper_price),
             'hsn_code': product.hsn_code,
             'additional_details': {

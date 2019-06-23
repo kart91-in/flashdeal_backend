@@ -140,7 +140,6 @@ class Order(BaseModel):
     def gen_return_request_params(self):
         if not self.delivery_info or not self.return_order:
             return None
-        delivery_info = self.delivery_info
         return_order = self.return_order
         skus_attributes = [v.skus_attributes() for v in self.purchases.all()]
         return {
@@ -148,8 +147,8 @@ class Order(BaseModel):
             "warehouse_name": return_order.warehouse_name,
             "warehouse_address": return_order.warehouse_address,
             "destination_pincode": return_order.destination_pincode,
-            "total_amount": return_order.total_amount,
-            "price": return_order.price,
+            "total_amount": int(return_order.total_amount),
+            "price": int(return_order.price),
             "pickup_type": "regular",
             "address_attributes": {
                 "address_line": return_order.address_line,
@@ -336,5 +335,10 @@ class ReturnOrder(BaseModel):
 
     def send_to_delivery(self):
         resp = send_reverse_request(self.order.gen_return_request_params())
-        self.meta = resp
+        if resp.ok:
+            self.status = ReturnOrder.STATUS_SENT_SUCCESS
+        else:
+            self.status = ReturnOrder.STATUS_SENT_FAILED
+        self.meta = resp.json()
         self.save()
+        return resp

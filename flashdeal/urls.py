@@ -6,7 +6,7 @@ from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
 from flashdeal.apis.catalog_apis import CatalogListCreateAPI, CatalogDestroyUpdateAPI
 from flashdeal.apis.flashdeal_apis import FlashDealListCreateAPI, FlashDealRetrieveUpdateDestroyAPIView
 from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI, OrderListCreateAPI, OrderResendCreateAPI, \
-    DeliveryInfoCreateAPI
+    DeliveryInfoCreateAPI, ReturnOrderAPI
 from flashdeal.apis.payment_apis import PaymentListCreateAPI, PaymentRetrieveAPI
 from flashdeal.apis.product_apis import ProductListCreateAPI, \
     ProductDestroyUpdateAPI, ProductColorListAPI, ProductSizeListAPI
@@ -57,7 +57,7 @@ urlpatterns = [
     path('api/order/<int:pk>/', OrderRetrieveUpdateDeleteAPI.as_view(), name='order_detail'),
     path('api/order/<int:pk>/delivery_info/', DeliveryInfoCreateAPI.as_view(), name='order_delivery_info'),
     path('api/order/<int:pk>/return/', OrderResendCreateAPI.as_view(), name='order_return'),
-    path('api/order_return/<int:pk>/send/', OrderResendCreateAPI.as_view(), name='order_return_send'),
+    path('api/order_return/<int:pk>/send/', ReturnOrderAPI.as_view(), name='order_return_send'),
 
     path('api/flashdeal/', FlashDealListCreateAPI.as_view(), name='flashdeal_list'),
     path('api/flashdeal/<int:pk>/', FlashDealRetrieveUpdateDestroyAPIView.as_view(), name='flashdeal'),
