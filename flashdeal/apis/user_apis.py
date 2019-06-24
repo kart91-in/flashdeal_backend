@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import transaction
 from rest_framework import permissions, status
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, mixins
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, mixins, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
@@ -44,8 +44,7 @@ class UserTokenAPI(APIView):
     def post(self, request, *args, **kwargs):
         otp = request.data.get('otp')
         user_phone = request.data.get('phone')
-        user = User.objects.filter(username=user_phone, is_active=False).first()
-
+        user = get_object_or_404(User, username=user_phone, is_active=False)
         verify_result = verify_otp(user_phone, otp)
 
         if verify_result.get('type') != 'success':
