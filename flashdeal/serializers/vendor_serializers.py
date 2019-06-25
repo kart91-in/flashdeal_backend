@@ -12,7 +12,7 @@ class VendorSerializer(serializers.ModelSerializer):
         model = Vendor
         fields = ('pk', 'user_id', 'name', 'email', 'gstin_number', 'address',
                   'phone', 'status', 'state', 'status',
-                  'username', 'password', 'images')
+                  'username', 'password', 'images', 'created_at')
         extra_kwargs = {
             'user_id': {'default': serializers.CurrentUserDefault(), 'source': 'user'},
         }

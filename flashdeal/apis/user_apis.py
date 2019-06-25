@@ -57,6 +57,4 @@ class UserTokenAPI(APIView):
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
-        return Response({'token': token }, status=status.HTTP_202_ACCEPTED)
-
-
+        return Response({'token': token}, status=status.HTTP_202_ACCEPTED)

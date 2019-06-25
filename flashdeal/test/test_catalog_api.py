@@ -1,14 +1,9 @@
 import json
 from random import randrange
-from unittest import mock
-from django.core.files import File
-
-from django.contrib.auth.models import User
 from django.urls import reverse
 from rest_framework import status
 
-from flashdeal.fixtures import add_vendor_profile
-from flashdeal.models import Vendor
+from flashdeal.fixtures import add_vendor_profile, gen_products
 from flashdeal.models.product_models import ProductColor, ProductSize, Product
 from flashdeal.test.base_request_test import BaseTest
 
@@ -20,79 +15,37 @@ class CatalogTest(BaseTest):
         super().setUp()
         self.login_user()
         add_vendor_profile(self.user)
-        colors = list(ProductColor.objects.all()[:2].values_list('pk', flat=True))
-        sizes = list(ProductSize.objects.all()[:2].values_list('pk', flat=True))
+        self.products = gen_products(3)
+
+        product_ids = list(Product.objects.all()[:2].values_list('pk', flat=True))
         self.data = {
             'name': self.f.job(),
             'description': self.f.text(),
-            'sale_price': randrange(10, 20),
-            'upper_price': randrange(20, 30),
-            'image_files': [
-                self._create_image(),
-                self._create_image(),
-            ],
-            'variants': json.dumps([
-                {
-                    'color': colors[0],
-                    'size': sizes[0],
-                    'sale_price': randrange(10, 20),
-                },
-                {
-                    'color': colors[1],
-                    'size': sizes[1],
-                    'stock': 5
-                }
-            ])
+            'product_ids': product_ids
         }
         self.data_update = {
             'name': self.f.job(),
             'description': self.f.text(),
-            'sale_price': randrange(10, 20),
-            'upper_price': randrange(20, 30),
+            'product_ids': product_ids[:-1]
         }
 
 
-    def test_create_product(self):
-        url = reverse('flashdeal:product')
-
-        resp = self.client.post(url, data=self.data, format='multipart')
+    def test_create_catalog_with_products(self):
+        url = reverse('flashdeal:catalog')
+        resp = self.client.post(url, data=self.data, format='json')
         data = resp.json()
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        self.assertIsNotNone(data.get('id'))
-        self.assertIsNotNone(data.get('product_variants'))
-        self.assertIsNotNone(data.get('images'))
+        self.assertEqual(len(data.get('products')), 2)
 
-    def test_get_list_product(self):
-        url = reverse('flashdeal:product')
-        self.client.post(url, data=self.data, format='multipart')
+    def test_update_catalog_with_products(self):
+        url = reverse('flashdeal:catalog')
+        resp = self.client.post(url, data=self.data, format='json')
+        data = resp.json()
+        self.assertEqual(len(data.get('products')), 2)
 
-        resp = self.client.get(url)
+        resp = self.client.put(reverse('flashdeal:catalog_object', kwargs={'pk': data.get('id')}),
+                                data=self.data_update, format='json')
         data = resp.json()
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(data), 1)
-
-    def test_delete_product(self):
-        url = reverse('flashdeal:product')
-        resp = self.client.post(url, data=self.data, format='multipart')
-        data = resp.json()
-        obj_pk = data.get('id')
-
-        url = reverse('flashdeal:product_object', kwargs={'pk': obj_pk})
-        resp = self.client.delete(url)
-
-        product = Product.objects.filter(pk=obj_pk).exists()
-        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(product, False)
-
-    def test_update_product(self):
-        url = reverse('flashdeal:product')
-        resp = self.client.post(url, data=self.data, format='multipart')
-        data = resp.json()
-        obj_pk = data.get('id')
-
-        url = reverse('flashdeal:product_object', kwargs={'pk': obj_pk})
-        resp = self.client.patch(url, data=self.data_update, format='json')
-        data = resp.json()
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(data.get('id'), obj_pk)
+        self.assertEqual(len(data.get('products')), 1)
         self.assertEqual(data.get('name'), self.data_update.get('name'))

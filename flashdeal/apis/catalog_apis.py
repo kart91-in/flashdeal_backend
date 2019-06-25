@@ -1,5 +1,6 @@
 from rest_framework import mixins
-from rest_framework.generics import UpdateAPIView, CreateAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import UpdateAPIView, CreateAPIView, ListAPIView, ListCreateAPIView, \
+    RetrieveUpdateDestroyAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from flashdeal.models import Product, Catalog
@@ -24,5 +25,5 @@ class CatalogDestroyUpdateAPI(RetrieveUpdateDestroyAPIView):
     serializer_class = CatalogSerializer
 
     def get_object(self):
-        return Catalog.objects.get(pk=self.kwargs.get('pk'))
+        return get_object_or_404(Catalog, pk=self.kwargs.get('pk'))
 
