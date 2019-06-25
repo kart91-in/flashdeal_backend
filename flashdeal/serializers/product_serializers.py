@@ -29,15 +29,18 @@ class ProductsVariantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductVariant
-        fields = ('id', 'stock', 'color', 'size', 'upper_price', 'sale_price', 'product', 'product_id')
+        fields = ('id', 'stock', 'color_id', 'size_id', 'upper_price',
+                  'sale_price', 'product_id', 'color', 'size')
         extra_kwargs = {
             'upper_price': {'required': False},
             'stock': {'required': False, },
+            'color_id': {'source': 'color'},
+            'size_id': {'source': 'size'},
+            'product_id': {'source': 'product'},
         }
 
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects)
-    color = serializers.PrimaryKeyRelatedField(queryset=ProductColor.objects)
-    size = serializers.PrimaryKeyRelatedField(queryset=ProductSize.objects)
+    color = ProductColorSerializer(read_only=True)
+    size = ProductSizeSerializer(read_only=True)
 
 
 class ProductsSerializer(serializers.ModelSerializer):
@@ -72,7 +75,7 @@ class ProductsSerializer(serializers.ModelSerializer):
             instance.images.create(image=image_file, owner=vendor.user )
         variants = [{
             **variant,
-            'product': instance.pk,
+            'product_id': instance.pk,
             'upper_price': instance.upper_price,
             'sale_price': instance.sale_price,
         } for variant in variants]

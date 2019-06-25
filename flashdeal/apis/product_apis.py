@@ -1,4 +1,5 @@
 from rest_framework import mixins
+from rest_framework.exceptions import ParseError
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView, ListCreateAPIView, \
     get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -23,6 +24,11 @@ class ProductSizeListAPI(ListAPIView):
 class ProductListCreateAPI(ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductsSerializer
+
+    def create(self, request, *args, **kwargs):
+        if not hasattr(request.user, 'vendor'):
+            raise ParseError('This user is not a Vendor user')
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         return Product.objects.order_by('-created_at')
