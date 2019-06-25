@@ -44,7 +44,7 @@ class UserTokenAPI(APIView):
     def post(self, request, *args, **kwargs):
         otp = request.data.get('otp')
         user_phone = request.data.get('phone')
-        user = get_object_or_404(User, username=user_phone, is_active=False)
+        user = get_object_or_404(User, username=user_phone)
         verify_result = verify_otp(user_phone, otp)
 
         if verify_result.get('type') != 'success':
