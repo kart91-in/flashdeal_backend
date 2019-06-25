@@ -25,12 +25,19 @@ class ImagesSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'owner_id', 'url', )
 
 
+class ProductSimpleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = ('id' ,'name', 'description', 'sale_price', 'upper_price', 'images', 'created_at' )
+
+
 class ProductsVariantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductVariant
         fields = ('id', 'stock', 'color_id', 'size_id', 'upper_price',
-                  'sale_price', 'product_id', 'color', 'size')
+                  'sale_price', 'product_id', 'color', 'size', 'product')
         extra_kwargs = {
             'upper_price': {'required': False},
             'stock': {'required': False, },
@@ -39,6 +46,13 @@ class ProductsVariantSerializer(serializers.ModelSerializer):
             'product_id': {'source': 'product'},
         }
 
+    def __init__(self, instance=None, **kwargs):
+        if not kwargs.pop('show_product', True):
+            del self.fields['product']
+        super().__init__(instance=instance, **kwargs)
+
+
+    product = ProductSimpleSerializer(read_only=True)
     color = ProductColorSerializer(read_only=True)
     size = ProductSizeSerializer(read_only=True)
 
@@ -48,7 +62,7 @@ class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('id' ,'name', 'description', 'sale_price', 'upper_price', 'images', 'variants',
-                  'image_files', 'product_variants')
+                  'image_files', 'product_variants', 'created_at')
         extra_kwargs = {
             'upper_price': {'required': False},
             'images': {'required': False,}
@@ -58,7 +72,8 @@ class ProductsSerializer(serializers.ModelSerializer):
     image_files = serializers.ListField(write_only=True,
         child=serializers.FileField(max_length=100000, allow_empty_file=False, use_url=False)
     )
-    product_variants = ProductsVariantSerializer(many=True, source='variants', read_only=True)
+    product_variants = ProductsVariantSerializer(many=True, source='variants',
+                                                 read_only=True, show_product=False)
     variants = serializers.JSONField(write_only=True)
 
     @transaction.atomic
