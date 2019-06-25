@@ -38,13 +38,13 @@ class ProductTest(BaseTest):
             ],
             'variants': json.dumps([
                 {
-                    'color': colors[0],
-                    'size': sizes[0],
+                    'color_id': colors[0],
+                    'size_id': sizes[0],
                     'sale_price': randrange(10, 20),
                 },
                 {
-                    'color': colors[1],
-                    'size': sizes[1],
+                    'color_id': colors[1],
+                    'size_id': sizes[1],
                     'stock': 5
                 }
             ])
