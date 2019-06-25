@@ -31,6 +31,8 @@ class ProductSimpleSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id' ,'name', 'description', 'sale_price', 'upper_price', 'images', 'created_at' )
 
+    images = ImagesSerializer(many=True, required=False)
+
 
 class ProductsVariantSerializer(serializers.ModelSerializer):
 
