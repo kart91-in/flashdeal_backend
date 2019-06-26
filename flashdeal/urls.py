@@ -4,6 +4,7 @@ from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 from flashdeal.apis.basket_apis import BasketRetrieveUpdateDeleteAPI
 from flashdeal.apis.catalog_apis import CatalogListCreateAPI, CatalogDestroyUpdateAPI
+from flashdeal.apis.choice_value_apis import StateListAPI
 from flashdeal.apis.flashdeal_apis import FlashDealListCreateAPI, FlashDealRetrieveUpdateDestroyAPIView
 from flashdeal.apis.order_apis import OrderRetrieveUpdateDeleteAPI, OrderListCreateAPI, OrderResendCreateAPI, \
     DeliveryInfoCreateAPI, ReturnOrderAPI, SendOrderToDeliveryAPI
@@ -68,6 +69,7 @@ urlpatterns = [
 
     path('api/chart/mcd/', ChartFileListAPI.as_view(), name='dump_fuck1'),
     path('api/contact/', ContactAPI.as_view(), name='dump_fuck2'),
+    path('api/state/', StateListAPI.as_view(), name='state_list'),
 
     path('api/token/create/', obtain_jwt_token, name='token_create'),
     path('api/token/refresh/', refresh_jwt_token, name='token_refresh'),
