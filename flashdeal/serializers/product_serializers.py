@@ -53,7 +53,6 @@ class ProductsVariantSerializer(serializers.ModelSerializer):
             del self.fields['product']
         super().__init__(instance=instance, **kwargs)
 
-
     product = ProductSimpleSerializer(read_only=True)
     color = ProductColorSerializer(read_only=True)
     size = ProductSizeSerializer(read_only=True)

@@ -2,13 +2,22 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import transaction
 from rest_framework import permissions, status
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, mixins, get_object_or_404
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, mixins, get_object_or_404, RetrieveAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.settings import api_settings
 
 from flashdeal.otp_service import verify_otp, send_otp_message, resend_otp_message
-from flashdeal.serializers.user_serializers import UserSerializer
+from flashdeal.serializers.user_serializers import UserSerializer, UserDetailSerializer
+
+
+class UserDetailAPI(RetrieveAPIView):
+
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = UserDetailSerializer
+
+    def get_object(self):
+        return self.request.user
 
 
 class UserRegisterAPI(CreateAPIView):
@@ -48,7 +57,7 @@ class UserTokenAPI(APIView):
         verify_result = verify_otp(user_phone, otp)
 
         if verify_result.get('type') != 'success':
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(verify_result, status=status.HTTP_404_NOT_FOUND)
 
         user.is_active = True
         user.save()
@@ -57,4 +66,5 @@ class UserTokenAPI(APIView):
         jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
-        return Response({'token': token}, status=status.HTTP_202_ACCEPTED)
+        user_detail = UserDetailSerializer(user).data
+        return Response({'token': token, 'user': user_detail}, status=status.HTTP_202_ACCEPTED)
